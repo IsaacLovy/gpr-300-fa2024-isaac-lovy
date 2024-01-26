@@ -35,7 +35,7 @@ struct Material {
 	float Ka = 1.0;
 	float Kd = 0.2;
 	float Ks = 0.9;
-	float Shininess = 50;
+	float Shininess = 24;
 }material;
 
 int main() {
