@@ -33,9 +33,9 @@ void resetCamera(ew::Camera* camera, ew::CameraController* controller)
 
 struct Material {
 	float Ka = 1.0;
-	float Kd = 0.5;
-	float Ks = 0.5;
-	float Shininess = 128;
+	float Kd = 0.2;
+	float Ks = 0.9;
+	float Shininess = 50;
 }material;
 
 int main() {
@@ -46,16 +46,15 @@ int main() {
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
 	
-	GLuint brickTexture = ew::loadTexture("assets/roof_color.jpg");
+	GLuint brickTexture = ew::loadTexture("assets/foil_color.jpg");
+	GLuint normalTexture = ew::loadTexture("assets/foil_normal.jpg");
+
 	//Bind brick texture to texture unit 0 
 	glBindTextureUnit(0, brickTexture);
+	glBindTextureUnit(1, normalTexture);
 	//Make "_MainTex" sampler2D sample from the 2D texture bound to unit 0
 	shader.use();
 	shader.setInt("_MainTex", 0);
-
-	GLuint normalTextture = ew::loadTexture("assets/roof_normal.jpg");
-	glBindTextureUnit(1, normalTextture);
-	shader.use();
 	shader.setInt("_NormalTex", 1);
 
 	ew::CameraController cameraController;

@@ -25,8 +25,8 @@ uniform sampler2D _NormalTex;
 
 void main(){
 	//Make sure fragment normal is still length 1 after interpolation.
-	vec3 normal = texture(_NormalTex, fs_in.TexCoord).rgb;
-	normal = normalize(normal * 2.0 - 1.0);
+	vec3 normal = texture(_NormalTex, fs_in.TexCoord).rgb * 2.0 - 1.0;
+	normal = normalize(normal);
 	normal = normalize(fs_in.TBN * normal);
 
 	//Light pointing straight down

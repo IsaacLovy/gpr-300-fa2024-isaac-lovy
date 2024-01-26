@@ -23,10 +23,9 @@ void main(){
 	vs_out.TexCoord = vTexCoord;
 
 	vec3 T = normalize(vec3(_Model * vec4(vTangent, 0.0)));
-	vec3 bitangent = cross(vTangent, vNormal);
+	vec3 bitangent = normalize(cross(vTangent, vNormal));
 	vec3 B = normalize(vec3(_Model * vec4(bitangent, 0.0)));
 	vec3 N = normalize(vec3(_Model * vec4(vNormal, 0.0)));
-
 
 	vs_out.TBN = mat3(T,B,N);
 	gl_Position = _ViewProjection * _Model * vec4(vPos,1.0);
