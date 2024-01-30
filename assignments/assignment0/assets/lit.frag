@@ -19,7 +19,7 @@ uniform sampler2D _MainTex;
 uniform vec3 _EyePos;
 uniform vec3 _LightDirection = vec3(0.0,-1.0,0.0);
 uniform vec3 _LightColor = vec3(1.0);
-uniform vec3 _AmbientColor = vec3(0.3,0.4,0.46);
+uniform vec3 _AmbientColor = vec3(0.2,0.2,0.2);
 
 uniform sampler2D _NormalTex;
 
@@ -39,7 +39,7 @@ void main(){
 	float specularFactor = pow(max(dot(normal,h),0.0),_Material.Shininess);
 	//Combination of specular and diffuse reflection
 	vec3 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * _LightColor;
-	lightColor+=_AmbientColor * _Material.Ka;
+	lightColor +=_AmbientColor * _Material.Ka;
 	vec3 objectColor = texture(_MainTex,fs_in.TexCoord).rgb;
 	FragColor = vec4(objectColor * lightColor,1.0);
 }
