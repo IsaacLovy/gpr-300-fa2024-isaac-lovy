@@ -2,6 +2,8 @@
 #include <math.h>
 #include <ew/external/glad.h>
 
+#include <ilgl/framebuffer.h>
+
 #include <ew/procGen.h>
 #include <ew/shader.h>
 #include <ew/model.h>
@@ -45,7 +47,7 @@ int main() {
 
 	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 
-	ew::Shader postProcess = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
+	ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
 
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
@@ -61,9 +63,10 @@ int main() {
 	shader.setInt("_MainTex", 0);
 	shader.setInt("_NormalTex", 1);
 
-	GLuint dummyVAO;
+	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
+
+	unsigned int dummyVAO;
 	glCreateVertexArrays(1, &dummyVAO);
-	glBindVertexArray(dummyVAO);
 
 	ew::CameraController cameraController;
 	ew::Camera camera;
@@ -84,16 +87,14 @@ int main() {
 		deltaTime = time - prevFrameTime;
 		prevFrameTime = time;
 
-		//RENDER
-		glClearColor(0.6f,0.8f,0.92f,1.0f); 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		cameraController.move(window, &camera, deltaTime);
 
 		//Rotate model around Y axis
 		monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
 
 
+		//RENDER
+		postProcessBuffer.Use();
 		shader.use();
 		//shader.setMat4("_Model", glm::mat4(1.0f));
 		//transform.modelMatrix() combines translation, rotation, and scale into a 4x4 model matrix
@@ -106,9 +107,13 @@ int main() {
 		shader.setFloat("_Material.Shininess", material.Shininess);
 		monkeyModel.draw(); //Draws monkey model using current shader
 
+		//Render post process to backbuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		postProcess.use();
-
+		postProcessShader.use();
+		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		drawUI(&camera, &cameraController);
