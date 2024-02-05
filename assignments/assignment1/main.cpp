@@ -41,8 +41,12 @@ struct Material {
 	float Shininess = 50;
 }material;
 
+//Post Process State
+float vignette_Intensity = 15;
+float vignette_Distance = 0.25;
+
 int main() {
-	GLFWwindow* window = initWindow("Assignment 0", screenWidth, screenHeight);
+	GLFWwindow* window = initWindow("Assignment 1", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
@@ -52,16 +56,11 @@ int main() {
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
 	
-	GLuint brickTexture = ew::loadTexture("assets/color.jpg");
+	GLuint colorTexture = ew::loadTexture("assets/color.jpg");
 	GLuint normalTexture = ew::loadTexture("assets/normal.jpg");
 
-	//Bind brick texture to texture unit 0 
-	glBindTextureUnit(0, brickTexture);
-	glBindTextureUnit(1, normalTexture);
 	//Make "_MainTex" sampler2D sample from the 2D texture bound to unit 0
 	shader.use();
-	shader.setInt("_MainTex", 0);
-	shader.setInt("_NormalTex", 1);
 
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
 
@@ -96,8 +95,11 @@ int main() {
 		//RENDER
 		postProcessBuffer.use();
 		shader.use();
-		//shader.setMat4("_Model", glm::mat4(1.0f));
-		//transform.modelMatrix() combines translation, rotation, and scale into a 4x4 model matrix
+		//Bind brick texture to texture unit 0 
+		glBindTextureUnit(0, colorTexture);
+		shader.setInt("_MainTex", 0);
+		glBindTextureUnit(1, normalTexture);
+		shader.setInt("_NormalTex", 1);
 		shader.setMat4("_Model", monkeyTransform.modelMatrix());
 		shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		shader.setVec3("_EyePos", camera.position);
@@ -114,7 +116,9 @@ int main() {
 
 		postProcessShader.use();
 		glBindTextureUnit(0, postProcessBuffer.getColorTexture());
-		postProcessShader.setInt("_ColorBuffer", 0);
+		//postProcessShader.setInt("_ColorBuffer", 0);
+		postProcessShader.setFloat("_Vignette_I", vignette_Intensity);
+		postProcessShader.setFloat("_Vignette_D", vignette_Distance);
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -139,6 +143,11 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
 	}
 
+	if (ImGui::CollapsingHeader("Post Process")) {
+		ImGui::SliderFloat("Vignette Distance", &vignette_Intensity, 0.0f, 25.0f);
+		ImGui::SliderFloat("Vignette Intensity", &vignette_Distance, 0.0f, 1);
+	}
+	
 	if (ImGui::Button("Reset Camera")) {
 		resetCamera(camera, cameraController);
 	}
