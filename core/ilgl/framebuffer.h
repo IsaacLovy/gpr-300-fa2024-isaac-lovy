@@ -11,7 +11,8 @@ namespace ilgl
 		FrameBuffer(int width, int height);
 		~FrameBuffer();
 
-		void Use();
+		void use();
+		int getColorTexture();
 
 	private:
 		int width, height;

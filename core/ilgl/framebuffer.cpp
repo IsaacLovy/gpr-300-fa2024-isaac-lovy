@@ -23,7 +23,7 @@ ilgl::FrameBuffer::~FrameBuffer()
 {
 }
 
-void ilgl::FrameBuffer::Use()
+void ilgl::FrameBuffer::use()
 {
 	GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
@@ -37,4 +37,9 @@ void ilgl::FrameBuffer::Use()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+}
+
+int ilgl::FrameBuffer::getColorTexture()
+{
+	return colorBuffer;
 }

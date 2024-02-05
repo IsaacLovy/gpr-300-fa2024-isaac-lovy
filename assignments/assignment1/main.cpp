@@ -94,7 +94,7 @@ int main() {
 
 
 		//RENDER
-		postProcessBuffer.Use();
+		postProcessBuffer.use();
 		shader.use();
 		//shader.setMat4("_Model", glm::mat4(1.0f));
 		//transform.modelMatrix() combines translation, rotation, and scale into a 4x4 model matrix
@@ -113,6 +113,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		postProcessShader.use();
+		glBindTextureUnit(0, postProcessBuffer.getColorTexture());
+		postProcessShader.setInt("_ColorBuffer", 0);
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
