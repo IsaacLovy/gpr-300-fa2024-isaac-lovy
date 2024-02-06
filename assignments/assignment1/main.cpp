@@ -45,6 +45,10 @@ struct Material {
 float vignette_Intensity = 15;
 float vignette_Distance = 0.25;
 
+float rOffset = 0;
+float gOffset = 0;
+float bOffset = 0;
+
 int main() {
 	GLFWwindow* window = initWindow("Assignment 1", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -119,6 +123,9 @@ int main() {
 		//postProcessShader.setInt("_ColorBuffer", 0);
 		postProcessShader.setFloat("_Vignette_I", vignette_Intensity);
 		postProcessShader.setFloat("_Vignette_D", vignette_Distance);
+		postProcessShader.setFloat("_RedOffset", rOffset);
+		postProcessShader.setFloat("_GreenOffset", gOffset);
+		postProcessShader.setFloat("_BlueOffset", bOffset);
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -144,8 +151,17 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	}
 
 	if (ImGui::CollapsingHeader("Post Process")) {
-		ImGui::SliderFloat("Vignette Distance", &vignette_Intensity, 0.0f, 25.0f);
-		ImGui::SliderFloat("Vignette Intensity", &vignette_Distance, 0.0f, 1);
+		if (ImGui::CollapsingHeader("Vignette"))
+		{
+			ImGui::SliderFloat("Vignette Distance", &vignette_Intensity, 0.0f, 25.0f);
+			ImGui::SliderFloat("Vignette Intensity", &vignette_Distance, 0.0f, 1);
+		}
+		if (ImGui::CollapsingHeader("Aberration"))
+		{
+			ImGui::SliderFloat("Aberration R", &rOffset, -.01f, .01f);
+			ImGui::SliderFloat("Aberration G", &gOffset, -.01f, .01f);
+			ImGui::SliderFloat("Aberration B", &bOffset, -.01f, .01f);
+		}
 	}
 	
 	if (ImGui::Button("Reset Camera")) {
