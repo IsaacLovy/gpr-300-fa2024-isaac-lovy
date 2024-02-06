@@ -11,6 +11,7 @@ void main(){
 	vec3 color = texture(_ColorBuffer,UV).rgb;
 	
 	//vignette effect
+	//https://www.shadertoy.com/view/lsKSWR
 	vec2 vig_uv = UV * (1.0 - UV.xy);
 	float vig = vig_uv.x*vig_uv.y*_Vignette_I;
 	vig = pow(vig, _Vignette_D);
