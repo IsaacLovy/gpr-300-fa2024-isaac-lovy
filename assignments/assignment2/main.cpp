@@ -3,6 +3,7 @@
 #include <ew/external/glad.h>
 
 #include <ilgl/framebuffer.h>
+#include <ilgl/ilgl_scene.h>
 
 #include <ew/procGen.h>
 #include <ew/shader.h>
@@ -24,6 +25,10 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController);
 //Global state
 int screenWidth = 1080;
 int screenHeight = 720;
+
+unsigned int shadowWidth = 1024;
+unsigned int shadowHeight = 1024;
+
 float prevFrameTime;
 float deltaTime;
 
@@ -34,13 +39,6 @@ void resetCamera(ew::Camera* camera, ew::CameraController* controller)
 	controller->yaw = controller->pitch = 0;
 }
 
-struct Material {
-	float Ka = 0.25;
-	float Kd = 0.8;
-	float Ks = 0.5;
-	float Shininess = 50;
-}material;
-
 //Post Process State
 float vignette_Intensity = 15;
 float vignette_Distance = 0.25;
@@ -49,31 +47,43 @@ float rOffset = 0;
 float gOffset = 0;
 float bOffset = 0;
 
+GLuint colorTexture;
+GLuint normalTexture;
+
+ew::CameraController cameraController;
+ew::Camera camera;
+
 int main() {
 	GLFWwindow* window = initWindow("Assignment 1", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
+	ilgl::ILGL_Scene scene;
 
+	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
 
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
-	
-	GLuint colorTexture = ew::loadTexture("assets/color.jpg");
-	GLuint normalTexture = ew::loadTexture("assets/normal.jpg");
 
-	//Make "_MainTex" sampler2D sample from the 2D texture bound to unit 0
-	shader.use();
+	ilgl::Material monketMat;
+	monketMat.Ka = 0.25;
+	monketMat.Kd = 0.8;
+	monketMat.Ks = 0.5;
+	monketMat.Shininess = 50;
+	monketMat.colorTexture = ew::loadTexture("assets/color.jpg");
+	monketMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
+	int monkeyID = scene.addElement(&shader, &monkeyModel, monkeyTransform, monketMat);
+
+	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
-
 	unsigned int dummyVAO;
 	glCreateVertexArrays(1, &dummyVAO);
 
-	ew::CameraController cameraController;
-	ew::Camera camera;
+	//Setup for Shadowmap
+	ilgl::FrameBuffer shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight);
 
+	//Setup for Camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
 	camera.target = glm::vec3(0.0f, 0.0f, 0.0f); //Look at the center of the scene
 	camera.aspectRatio = (float)screenWidth / screenHeight;
@@ -95,23 +105,9 @@ int main() {
 		//Rotate model around Y axis
 		monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
 
-
 		//RENDER
 		postProcessBuffer.use();
-		shader.use();
-		//Bind brick texture to texture unit 0 
-		glBindTextureUnit(0, colorTexture);
-		shader.setInt("_MainTex", 0);
-		glBindTextureUnit(1, normalTexture);
-		shader.setInt("_NormalTex", 1);
-		shader.setMat4("_Model", monkeyTransform.modelMatrix());
-		shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		shader.setVec3("_EyePos", camera.position);
-		shader.setFloat("_Material.Ka", material.Ka);
-		shader.setFloat("_Material.Kd", material.Kd);
-		shader.setFloat("_Material.Ks", material.Ks);
-		shader.setFloat("_Material.Shininess", material.Shininess);
-		monkeyModel.draw(); //Draws monkey model using current shader
+		scene.drawScene(camera);
 
 		//Render post process to backbuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -143,12 +139,12 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 
 	ImGui::Begin("Settings");
 
-	if (ImGui::CollapsingHeader("Material")) {
+	/*if (ImGui::CollapsingHeader("Material")) {
 		ImGui::SliderFloat("AmbientK", &material.Ka, 0.0f, 1.0f);
 		ImGui::SliderFloat("DiffuseK", &material.Kd, 0.0f, 1.0f);
 		ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
 		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
-	}
+	}*/
 
 	if (ImGui::CollapsingHeader("Post Process")) {
 		if (ImGui::CollapsingHeader("Vignette"))

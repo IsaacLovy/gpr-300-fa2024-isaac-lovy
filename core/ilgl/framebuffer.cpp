@@ -17,6 +17,11 @@ ilgl::FrameBuffer::FrameBuffer(int width, int height)
 	glBindTexture(GL_TEXTURE_2D, depthBuffer);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT16, width, height);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer, 0);
+
+	//glGenTextures(1, &stencilBuffer);
+	//glBindTexture(GL_TEXTURE_2D, stencilBuffer);
+	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_STENCIL_COMPONENTS, width, height);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, stencilBuffer, 0);
 }
 
 ilgl::FrameBuffer::~FrameBuffer()
