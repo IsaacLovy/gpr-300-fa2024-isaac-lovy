@@ -40,7 +40,9 @@ void resetCamera(ew::Camera* camera, ew::CameraController* controller)
 	controller->yaw = controller->pitch = 0;
 }
 
-//Post Process State
+//Post Process States
+bool vignetteEffect = false;
+bool aberrationEffect = false;
 float vignette_Intensity = 15;
 float vignette_Distance = 0.25;
 
@@ -66,7 +68,9 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	lightCam.orthographic = true;
-	lightCam.farPlane = 10;
+	lightCam.farPlane = 6;
+	lightCam.aspectRatio = 1.0f;
+	lightCam.orthoHeight = 12.0f;
 
 	ilgl::ILGL_Scene scene;
 
@@ -82,7 +86,7 @@ int main() {
 	groundTransform.position = glm::vec3(0, -1, 0);
 
 	ilgl::Material monketMat;
-	monketMat.Ka = 0.25;
+	monketMat.Ka = 0.4;
 	monketMat.Kd = 0.8;
 	monketMat.Ks = 0.5;
 	monketMat.Shininess = 50;
@@ -97,7 +101,7 @@ int main() {
 	unsigned int dummyVAO;
 	glCreateVertexArrays(1, &dummyVAO);
 
-	//Setup for Shadowmap
+	//Setup for ShadowMap
 	shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight, true);
 
 	//Setup for Camera
@@ -123,7 +127,7 @@ int main() {
 		//monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
 
 		//RENDER
-		lightCam.position = monkeyTransform.position -lightDir * lightCamDist;
+		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
@@ -140,6 +144,8 @@ int main() {
 		postProcessShader.use();
 		glBindTextureUnit(0, postProcessBuffer.getColorTexture());
 		//postProcessShader.setInt("_ColorBuffer", 0);
+		postProcessShader.setInt("_Vignette", vignetteEffect);
+		postProcessShader.setInt("_ChromaticAberration", aberrationEffect);
 		postProcessShader.setFloat("_Vignette_I", vignette_Intensity);
 		postProcessShader.setFloat("_Vignette_D", vignette_Distance);
 		postProcessShader.setFloat("_RedOffset", rOffset);
@@ -169,10 +175,13 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
 	}*/
 
-	ImGui::DragFloat("Shadowmap Height", &lightCam.orthoHeight);
-	ImGui::DragFloat("Shadowmap Far Plane", &lightCam.farPlane);
-	ImGui::DragFloat("Shadowmap Near Plane", &lightCam.nearPlane);
-	ImGui::DragFloat("Shadowmap Light Distance", &lightCamDist);
+	if(ImGui::CollapsingHeader("Shadowmap"))
+	{
+		ImGui::DragFloat("Height", &lightCam.orthoHeight);
+		ImGui::DragFloat("Far Plane", &lightCam.farPlane);
+		ImGui::DragFloat("Near Plane", &lightCam.nearPlane);
+		ImGui::DragFloat("Light Distance", &lightCamDist);
+	}
 
 	if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
 	{
@@ -185,11 +194,13 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	if (ImGui::CollapsingHeader("Post Process")) {
 		if (ImGui::CollapsingHeader("Vignette"))
 		{
+			ImGui::Checkbox("Vignette On/Off", &vignetteEffect);
 			ImGui::SliderFloat("Vignette Distance", &vignette_Intensity, 0.0f, 25.0f);
 			ImGui::SliderFloat("Vignette Intensity", &vignette_Distance, 0.0f, 1);
 		}
 		if (ImGui::CollapsingHeader("Aberration"))
 		{
+			ImGui::Checkbox("Aberration On/Off", &aberrationEffect);
 			ImGui::SliderFloat("Aberration R", &rOffset, -.01f, .01f);
 			ImGui::SliderFloat("Aberration G", &gOffset, -.01f, .01f);
 			ImGui::SliderFloat("Aberration B", &bOffset, -.01f, .01f);
@@ -203,7 +214,7 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	ImGui::Text("Add Controls Here!");
 	ImGui::End();
 
-	ImGui::Begin("Shadwo Map");
+	ImGui::Begin("Shadow Map");
 	ImGui::BeginChild("Shadow Map");
 	ImVec2 windowSize = ImGui::GetWindowSize();
 

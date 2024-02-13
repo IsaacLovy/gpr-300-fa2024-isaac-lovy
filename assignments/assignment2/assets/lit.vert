@@ -30,6 +30,6 @@ void main(){
 	vec3 N = normalize(vec3(_Model * vec4(vNormal, 0.0)));
 
 	vs_out.TBN = mat3(T,B,N);
-	LightSpacePos =  _LightViewProj * _Model * vec4(vPos,1);
+	LightSpacePos =  _LightViewProj * _Model * vec4(vPos,1.0);
 	gl_Position = _ViewProjection * _Model * vec4(vPos,1.0);
 }

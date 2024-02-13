@@ -31,7 +31,8 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos)
 {
 	vec3 sampleCoord = lightSpacePos.xyz / lightSpacePos.w;
 	sampleCoord = sampleCoord * 0.5 + 0.5;
-	float myDepth = sampleCoord.z;
+	float bias = max(0.05 * (1.0 - dot(fs_in.WorldNormal, -_LightDirection)), 0.005);
+	float myDepth = sampleCoord.z - bias;
 	float shadowMapDepth = texture(shadowMap, sampleCoord.xy).r;
 
 	return step(shadowMapDepth, myDepth);
@@ -43,7 +44,6 @@ void main(){
 	normal = normalize(normal);
 	normal = normalize(fs_in.TBN * normal);
 
-	//Light pointing straight down
 	vec3 toLight = -_LightDirection;
 	float diffuseFactor = max(dot(normal,toLight),0.0);
 	//Calculate specularly reflected light
@@ -54,7 +54,8 @@ void main(){
 	//Combination of specular and diffuse reflection
 	float shadow = calcShadow(_ShadowMap, LightSpacePos);
 	vec3 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * _LightColor * (1.0 - shadow);
-	lightColor +=_AmbientColor * _Material.Ka;
+	//Add in ambient color after the shadow effected lighting
+	lightColor += _AmbientColor * _Material.Ka;
 	vec3 objectColor = texture(_MainTex,fs_in.TexCoord).rgb;
 	FragColor = vec4(objectColor * lightColor,1.0);
 }
