@@ -16,12 +16,26 @@ struct Material {
 uniform Material _Material;
 
 uniform sampler2D _MainTex; 
+uniform sampler2D _ShadowMap;
+
+in vec4 LightSpacePos;
+
 uniform vec3 _EyePos;
 uniform vec3 _LightDirection = vec3(0.0,-1.0,0.0);
 uniform vec3 _LightColor = vec3(1.0);
 uniform vec3 _AmbientColor = vec3(0.2,0.2,0.2);
 
 uniform sampler2D _NormalTex;
+
+float calcShadow(sampler2D shadowMap, vec4 lightSpacePos)
+{
+	vec3 sampleCoord = lightSpacePos.xyz / lightSpacePos.w;
+	sampleCoord = sampleCoord * 0.5 + 0.5;
+	float myDepth = sampleCoord.z;
+	float shadowMapDepth = texture(shadowMap, sampleCoord.xy).r;
+
+	return step(shadowMapDepth, myDepth);
+}
 
 void main(){
 	//Make sure fragment normal is still length 1 after interpolation.
@@ -38,7 +52,8 @@ void main(){
 	vec3 h = normalize(toLight + toEye);
 	float specularFactor = pow(max(dot(normal,h),0.0),_Material.Shininess);
 	//Combination of specular and diffuse reflection
-	vec3 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * _LightColor;
+	float shadow = calcShadow(_ShadowMap, LightSpacePos);
+	vec3 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * _LightColor * (1.0 - shadow);
 	lightColor +=_AmbientColor * _Material.Ka;
 	vec3 objectColor = texture(_MainTex,fs_in.TexCoord).rgb;
 	FragColor = vec4(objectColor * lightColor,1.0);

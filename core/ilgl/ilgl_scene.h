@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "framebuffer.h"
 #include "../ew/model.h"
 #include "../ew/transform.h"
 #include "../ew/camera.h"
@@ -31,13 +32,15 @@ namespace ilgl {
 		~ILGL_Scene();
 		int addElement(ew::Shader* shader, ew::Model* mesh, ew::Transform transform, Material mat);
 		void setLightDir(glm::vec3 dir);
-		void drawScene(ew::Camera eye);
+		void drawScene(ew::Camera eye, ew::Camera lightCam);
 		void drawSceneDepth(ew::Camera eye, ew::Shader globalShader);
+		void setShadowBuffer(int shadowMap);
 
 	private:
 		int nextID;
 		int getID();
 		glm::vec3 lightDir;
+		int shadowMap;
 		std::vector<SceneElement> elements;
 	};
 }

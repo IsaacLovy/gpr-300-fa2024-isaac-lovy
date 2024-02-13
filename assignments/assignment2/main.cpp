@@ -123,14 +123,14 @@ int main() {
 		//monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
 
 		//RENDER
-		lightDir = glm::normalize(lightDir);
 		lightCam.position = monkeyTransform.position -lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
 
 		postProcessBuffer.use();
-		scene.drawScene(camera);
+		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
+		scene.drawScene(camera, lightCam);
 
 		//Render post process to backbuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -174,7 +174,13 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	ImGui::DragFloat("Shadowmap Near Plane", &lightCam.nearPlane);
 	ImGui::DragFloat("Shadowmap Light Distance", &lightCamDist);
 
-	ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1);
+	if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
+	{
+		if (glm::length(lightDir) != 0)
+		{
+			lightDir = glm::normalize(lightDir);
+		}
+	}
 
 	if (ImGui::CollapsingHeader("Post Process")) {
 		if (ImGui::CollapsingHeader("Vignette"))

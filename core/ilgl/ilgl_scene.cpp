@@ -46,7 +46,7 @@ void ilgl::ILGL_Scene::setLightDir(glm::vec3 dir)
 	lightDir = dir;
 }
 
-void ilgl::ILGL_Scene::drawScene(ew::Camera eye)
+void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 {
 	for (int i = 0; i < elements.size(); i++)
 	{
@@ -59,6 +59,8 @@ void ilgl::ILGL_Scene::drawScene(ew::Camera eye)
 		elements[i].shader->setMat4("_ViewProjection", eye.projectionMatrix() * eye.viewMatrix());
 		elements[i].shader->setVec3("_EyePos", eye.position);
 		elements[i].shader->setVec3("_LightDirection", lightDir);
+		elements[i].shader->setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
+		elements[i].shader->setInt("_ShadowMap", shadowMap);
 		elements[i].shader->setFloat("_Material.Ka", elements[i].material.Ka);
 		elements[i].shader->setFloat("_Material.Kd", elements[i].material.Kd);
 		elements[i].shader->setFloat("_Material.Ks", elements[i].material.Ks);
@@ -77,6 +79,11 @@ void ilgl::ILGL_Scene::drawSceneDepth(ew::Camera eye, ew::Shader globalShader)
 		//globalShader.setVec3("_EyePos", eye.position);
 		elements[i].model->draw();
 	}
+}
+
+void ilgl::ILGL_Scene::setShadowBuffer(int shadowMap)
+{
+	this->shadowMap = shadowMap;
 }
 
 int ilgl::ILGL_Scene::getID()
