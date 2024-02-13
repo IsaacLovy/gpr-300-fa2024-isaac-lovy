@@ -10,6 +10,7 @@
 #include <ew/model.h>
 #include <ew/camera.h>
 #include <ew/transform.h>
+#include <ew/procGen.h>
 #include <ew/cameraController.h>
 #include <ew/texture.h>
 
@@ -50,6 +51,12 @@ float bOffset = 0;
 GLuint colorTexture;
 GLuint normalTexture;
 
+ilgl::FrameBuffer shadowMapBuffer;
+
+glm::vec3 lightDir = glm::vec3(0, -1, 0);
+
+ew::Camera lightCam;
+
 ew::CameraController cameraController;
 ew::Camera camera;
 
@@ -57,13 +64,20 @@ int main() {
 	GLFWwindow* window = initWindow("Assignment 1", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
+	lightCam.orthographic = true;
+
 	ilgl::ILGL_Scene scene;
 
 	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
+	ew::Shader depthOnlyShader = ew::Shader("assets/depthOnly.vert", "assets/depthOnly.frag");
 
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
+
+	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
+	ew::Transform groundTransform;
+	groundTransform.position = glm::vec3(0, -0.5, 0);
 
 	ilgl::Material monketMat;
 	monketMat.Ka = 0.25;
@@ -74,6 +88,7 @@ int main() {
 	monketMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
 	int monkeyID = scene.addElement(&shader, &monkeyModel, monkeyTransform, monketMat);
+	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monketMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
@@ -81,7 +96,7 @@ int main() {
 	glCreateVertexArrays(1, &dummyVAO);
 
 	//Setup for Shadowmap
-	ilgl::FrameBuffer shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight);
+	shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight, true);
 
 	//Setup for Camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -103,9 +118,15 @@ int main() {
 		cameraController.move(window, &camera, deltaTime);
 
 		//Rotate model around Y axis
-		monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
+		//monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
 
 		//RENDER
+		lightDir = glm::normalize(lightDir);
+		lightCam.position = -lightDir * 5.0f;
+		scene.setLightDir(lightDir);
+		shadowMapBuffer.use();
+		scene.drawSceneDepth(lightCam, depthOnlyShader);
+
 		postProcessBuffer.use();
 		scene.drawScene(camera);
 
@@ -146,6 +167,12 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
 	}*/
 
+	ImGui::DragFloat("Shadowmap Height", &lightCam.orthoHeight);
+	ImGui::DragFloat("Shadowmap Far Plane", &lightCam.farPlane);
+	ImGui::DragFloat("Shadowmap Near Plane", &lightCam.nearPlane);
+
+	ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1);
+
 	if (ImGui::CollapsingHeader("Post Process")) {
 		if (ImGui::CollapsingHeader("Vignette"))
 		{
@@ -166,6 +193,15 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 
 	ImGui::Text("Add Controls Here!");
 	ImGui::End();
+
+	ImGui::Begin("Shadwo Map");
+	ImGui::BeginChild("Shadow Map");
+	ImVec2 windowSize = ImGui::GetWindowSize();
+
+	ImGui::Image((ImTextureID)shadowMapBuffer.getDepthBuffer(), windowSize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::EndChild();
+	ImGui::End();
+
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

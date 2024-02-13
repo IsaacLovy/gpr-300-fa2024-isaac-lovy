@@ -8,11 +8,13 @@ namespace ilgl
 	class FrameBuffer
 	{
 	public:
-		FrameBuffer(int width, int height);
+		FrameBuffer();
+		FrameBuffer(int width, int height, bool isShadow = false);
 		~FrameBuffer();
 
 		void use();
 		int getColorTexture();
+		int getDepthBuffer();
 
 	private:
 		int width, height;

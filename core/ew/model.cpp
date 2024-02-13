@@ -23,6 +23,11 @@ namespace ew {
 		}
 	}
 
+	Model::Model(ew::Mesh mesh)
+	{
+		m_meshes.push_back(mesh);
+	}
+
 	void Model::draw()
 	{
 		for (size_t i = 0; i < m_meshes.size(); i++)
