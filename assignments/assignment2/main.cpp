@@ -56,6 +56,7 @@ ilgl::FrameBuffer shadowMapBuffer;
 glm::vec3 lightDir = glm::vec3(0, -1, 0);
 
 ew::Camera lightCam;
+float lightCamDist = 4.0f;
 
 ew::CameraController cameraController;
 ew::Camera camera;
@@ -65,6 +66,7 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	lightCam.orthographic = true;
+	lightCam.farPlane = 10;
 
 	ilgl::ILGL_Scene scene;
 
@@ -77,7 +79,7 @@ int main() {
 
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
 	ew::Transform groundTransform;
-	groundTransform.position = glm::vec3(0, -0.5, 0);
+	groundTransform.position = glm::vec3(0, -1, 0);
 
 	ilgl::Material monketMat;
 	monketMat.Ka = 0.25;
@@ -122,7 +124,7 @@ int main() {
 
 		//RENDER
 		lightDir = glm::normalize(lightDir);
-		lightCam.position = -lightDir * 5.0f;
+		lightCam.position = monkeyTransform.position -lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
@@ -170,6 +172,7 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	ImGui::DragFloat("Shadowmap Height", &lightCam.orthoHeight);
 	ImGui::DragFloat("Shadowmap Far Plane", &lightCam.farPlane);
 	ImGui::DragFloat("Shadowmap Near Plane", &lightCam.nearPlane);
+	ImGui::DragFloat("Shadowmap Light Distance", &lightCamDist);
 
 	ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1);
 
