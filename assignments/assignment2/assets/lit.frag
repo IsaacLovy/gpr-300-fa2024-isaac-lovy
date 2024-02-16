@@ -29,10 +29,14 @@ uniform sampler2D _NormalTex;
 
 float calcShadow(sampler2D shadowMap, vec4 lightSpacePos)
 {
+
 	vec3 sampleCoord = lightSpacePos.xyz / lightSpacePos.w;
 	sampleCoord = sampleCoord * 0.5 + 0.5;
 	float bias = max(0.05 * (1.0 - dot(fs_in.WorldNormal, -_LightDirection)), 0.005);
 	float myDepth = sampleCoord.z - bias;
+
+	if (myDepth > 1) return 0;
+
 	float shadowMapDepth = texture(shadowMap, sampleCoord.xy).r;
 
 	return step(shadowMapDepth, myDepth);

@@ -25,8 +25,6 @@ ilgl::FrameBuffer::FrameBuffer(int width, int height, bool isShadow)
 
 	glGenTextures(1, &depthBuffer);
 	glBindTexture(GL_TEXTURE_2D, depthBuffer);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT16, width, height);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer, 0);
 
 	if (isShadow)
 	{
@@ -40,6 +38,10 @@ ilgl::FrameBuffer::FrameBuffer(int width, int height, bool isShadow)
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 	}
+
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT16, width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer, 0);
+
 
 	//glGenTextures(1, &stencilBuffer);
 	//glBindTexture(GL_TEXTURE_2D, stencilBuffer);
