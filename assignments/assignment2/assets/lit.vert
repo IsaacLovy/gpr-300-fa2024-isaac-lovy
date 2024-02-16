@@ -8,6 +8,7 @@ layout(location = 3) in vec3 vTangent;
 uniform mat4 _Model; 
 uniform mat4 _ViewProjection;
 uniform mat4 _LightViewProj;
+
 out vec4 LightSpacePos;
 
 out Surface{

@@ -33,14 +33,17 @@ namespace ilgl {
 		int addElement(ew::Shader* shader, ew::Model* mesh, ew::Transform transform, Material mat);
 		void setLightDir(glm::vec3 dir);
 		void drawScene(ew::Camera eye, ew::Camera lightCam);
-		void drawSceneDepth(ew::Camera eye, ew::Shader globalShader);
+		void drawSceneDepth(ew::Camera eye, ew::Shader shadowShader);
 		void setShadowBuffer(int shadowMap);
+		void setShadowBiasMinMax(float min, float max);
 
 	private:
 		int nextID;
 		int getID();
 		glm::vec3 lightDir;
 		int shadowMap;
+		float shadowMinBias = 0.005;
+		float shadowMaxBias = 0.015;
 		std::vector<SceneElement> elements;
 	};
 }

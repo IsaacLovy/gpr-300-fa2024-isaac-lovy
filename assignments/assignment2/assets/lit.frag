@@ -20,6 +20,10 @@ uniform sampler2D _ShadowMap;
 
 in vec4 LightSpacePos;
 
+
+uniform float _MaxBias;
+uniform float _MinBias;
+
 uniform vec3 _EyePos;
 uniform vec3 _LightDirection = vec3(0.0,-1.0,0.0);
 uniform vec3 _LightColor = vec3(1.0);
@@ -32,7 +36,7 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos)
 
 	vec3 sampleCoord = lightSpacePos.xyz / lightSpacePos.w;
 	sampleCoord = sampleCoord * 0.5 + 0.5;
-	float bias = max(0.025 * (1.0 - dot(fs_in.WorldNormal, -_LightDirection)), 0.0025);
+	float bias = max(_MaxBias * (1.0 - dot(fs_in.WorldNormal, -_LightDirection)), _MinBias);
 	float myDepth = sampleCoord.z - bias;
 
 	if (myDepth > 1) return 0;

@@ -30,6 +30,9 @@ int screenHeight = 720;
 unsigned int shadowWidth = 1024;
 unsigned int shadowHeight = 1024;
 
+float shadowMinBias = 0.005;
+float shadowMaxBias = 0.015;
+
 float prevFrameTime;
 float deltaTime;
 
@@ -133,6 +136,7 @@ int main() {
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
 
 		postProcessBuffer.use();
+		scene.setShadowBiasMinMax(shadowMinBias, shadowMaxBias);
 		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
 		scene.drawScene(camera, lightCam);
 
@@ -181,6 +185,8 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::DragFloat("Far Plane", &lightCam.farPlane);
 		ImGui::DragFloat("Near Plane", &lightCam.nearPlane);
 		ImGui::DragFloat("Light Distance", &lightCamDist);
+		ImGui::DragFloat("Max Bias", &shadowMaxBias, .001f, 0.0f, 0.2);
+		ImGui::DragFloat("Min Bias", &shadowMinBias, .001f, 0.0f, 0.2);
 	}
 
 	if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
