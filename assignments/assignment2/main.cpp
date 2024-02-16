@@ -58,7 +58,7 @@ ilgl::FrameBuffer shadowMapBuffer;
 glm::vec3 lightDir = glm::vec3(0, -1, 0);
 
 ew::Camera lightCam;
-float lightCamDist = 4.0f;
+float lightCamDist = 5.0f;
 
 ew::CameraController cameraController;
 ew::Camera camera;
@@ -68,9 +68,9 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	lightCam.orthographic = true;
-	lightCam.farPlane = 6;
+	lightCam.farPlane = 15;
 	lightCam.aspectRatio = 1.0f;
-	lightCam.orthoHeight = 12.0f;
+	lightCam.orthoHeight = 16.0f;
 
 	ilgl::ILGL_Scene scene;
 
