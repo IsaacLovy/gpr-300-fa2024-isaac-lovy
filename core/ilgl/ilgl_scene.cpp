@@ -48,7 +48,6 @@ void ilgl::ILGL_Scene::setLightDir(glm::vec3 dir)
 
 void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 {
-
 	for (int i = 0; i < elements.size(); i++)
 	{
 		elements[i].shader->use(); 
@@ -76,9 +75,6 @@ void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 
 void ilgl::ILGL_Scene::drawSceneDepth(ew::Camera eye, ew::Shader globalShader)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDepthFunc(GL_LESS);
-
 	globalShader.use();
 	for (int i = 0; i < elements.size(); i++)
 	{

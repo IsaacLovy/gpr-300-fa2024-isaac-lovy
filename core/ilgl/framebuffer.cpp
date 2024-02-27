@@ -2,12 +2,20 @@
 
 ilgl::FrameBuffer::FrameBuffer()
 {
-	fbo = colorBuffer = depthBuffer = stencilBuffer = -1;
+	fbo = depthBuffer = stencilBuffer = -1;
+	colorBuffer[0] = 0;
+	colorBuffer[1] = 0;
+	colorBuffer[2] = 0;
+	colorBuffer[3] = 0;
+	colorBuffer[4] = 0;
+	colorBuffer[5] = 0;
+	colorBuffer[6] = 0;
+	colorBuffer[7] = 0;
 }
 
 ilgl::FrameBuffer::FrameBuffer(int width, int height, bool isShadow)
 {
-	fbo = colorBuffer = depthBuffer = stencilBuffer = 0;
+	fbo = colorBuffer[0] = depthBuffer = stencilBuffer = 0;
 
 	this->width = width;
 	this->height = height;
@@ -17,10 +25,10 @@ ilgl::FrameBuffer::FrameBuffer(int width, int height, bool isShadow)
 
 	if (!isShadow)
 	{
-		glGenTextures(1, &colorBuffer);
-		glBindTexture(GL_TEXTURE_2D, colorBuffer);
+		glGenTextures(1, &colorBuffer[0]);
+		glBindTexture(GL_TEXTURE_2D, colorBuffer[0]);
 		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorBuffer, 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorBuffer[0], 0);
 	}
 
 	glGenTextures(1, &depthBuffer);
@@ -53,6 +61,28 @@ ilgl::FrameBuffer::~FrameBuffer()
 {
 }
 
+void ilgl::FrameBuffer::setResolution(int width, int height)
+{
+	this->height = height;
+	this->width = width;
+}
+
+void ilgl::FrameBuffer::addAttachment(int location, unsigned int format)
+{
+	glGenTextures(1, &colorBuffer[location]);
+	glBindTexture(GL_TEXTURE_2D, colorBuffer[location]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + format, colorBuffer[0], 0);
+}
+
+void ilgl::FrameBuffer::addDepthAttachment()
+{
+	glGenTextures(1, &depthBuffer);
+	glBindTexture(GL_TEXTURE_2D, depthBuffer);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT16, width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer, 0);
+}
+
 void ilgl::FrameBuffer::use()
 {
 	GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -69,12 +99,17 @@ void ilgl::FrameBuffer::use()
 
 }
 
-int ilgl::FrameBuffer::getColorTexture()
+int ilgl::FrameBuffer::getColorTexture(int location)
 {
-	return colorBuffer;
+	return colorBuffer[location];
 }
 
 int ilgl::FrameBuffer::getDepthBuffer()
 {
 	return depthBuffer;
+}
+
+int ilgl::FrameBuffer::getFBO()
+{
+	return fbo;
 }

@@ -77,9 +77,11 @@ int main() {
 
 	ilgl::ILGL_Scene scene;
 
-	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
-	ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
+	//ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
+	ew::Shader gBufferShader = ew::Shader("assets/lit.vert", "assets/geometryPass.frag");
+	//ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
 	ew::Shader depthOnlyShader = ew::Shader("assets/depthOnly.vert", "assets/depthOnly.frag");
+	ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
 
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
@@ -96,8 +98,8 @@ int main() {
 	monketMat.colorTexture = ew::loadTexture("assets/color.jpg");
 	monketMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
-	int monkeyID = scene.addElement(&shader, &monkeyModel, monkeyTransform, monketMat);
-	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monketMat);
+	int monkeyID = scene.addElement(&gBufferShader, &monkeyModel, monkeyTransform, monketMat);
+	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monketMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
@@ -106,6 +108,13 @@ int main() {
 
 	//Setup for ShadowMap
 	shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight, true);
+
+	ilgl::FrameBuffer gBufffer = ilgl::FrameBuffer();
+	gBufffer.setResolution(screenWidth, screenHeight);
+	gBufffer.addAttachment(0, GL_RGB32F);
+	gBufffer.addAttachment(1, GL_RGB16F);
+	gBufffer.addAttachment(2, GL_RGB8);
+	gBufffer.addDepthAttachment();
 
 	//Setup for Camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -137,31 +146,37 @@ int main() {
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
+		//Shadow Pass
 		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
 
-		postProcessBuffer.use();
-		scene.setShadowBiasMinMax(shadowMinBias, shadowMaxBias);
-		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
+		//Geometry Pass
+		glBindFramebuffer(GL_FRAMEBUFFER, gBufffer.getFBO());
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.drawScene(camera, lightCam);
 
-		//Render post process to backbuffer
+		//Lighting Pass
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		deferredLitShader.use();
+		glBindTextureUnit(0, gBufffer.getColorTexture(0));
+		glBindTextureUnit(1, gBufffer.getColorTexture(1));
+		glBindTextureUnit(2, gBufffer.getColorTexture(2));
+		glBindTextureUnit(3, gBufffer.getDepthBuffer());
+		deferredLitShader.setInt("_gWorldPos", 0);
+		deferredLitShader.setInt("_gWorldNormal", 1);
+		deferredLitShader.setInt("_gAlbedo", 2);
+		deferredLitShader.setInt("_ShadowMap", 3);
+		scene.setShadowBiasMinMax(shadowMinBias, shadowMaxBias);
+		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		postProcessShader.use();
-		glBindTextureUnit(0, postProcessBuffer.getColorTexture());
-		//postProcessShader.setInt("_ColorBuffer", 0);
-		postProcessShader.setInt("_Vignette", vignetteEffect);
-		postProcessShader.setInt("_ChromaticAberration", aberrationEffect);
-		postProcessShader.setFloat("_Vignette_I", vignette_Intensity);
-		postProcessShader.setFloat("_Vignette_D", vignette_Distance);
-		postProcessShader.setFloat("_RedOffset", rOffset);
-		postProcessShader.setFloat("_GreenOffset", gOffset);
-		postProcessShader.setFloat("_BlueOffset", bOffset);
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 

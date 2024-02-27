@@ -12,14 +12,19 @@ namespace ilgl
 		FrameBuffer(int width, int height, bool isShadow = false);
 		~FrameBuffer();
 
+		void setResolution(int width, int height);
+		void addAttachment(int location, unsigned int format);
+		void addDepthAttachment();
+
 		void use();
-		int getColorTexture();
+		int getColorTexture(int location = 0);
 		int getDepthBuffer();
+		int getFBO();
 
 	private:
 		int width, height;
 		unsigned int fbo;
-		unsigned int colorBuffer;
+		unsigned int colorBuffer[8];
 		unsigned int depthBuffer;
 		unsigned int stencilBuffer;
 	};
