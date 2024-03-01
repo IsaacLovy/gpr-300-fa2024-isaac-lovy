@@ -72,7 +72,12 @@ void ilgl::FrameBuffer::addAttachment(int location, unsigned int format)
 	glGenTextures(1, &colorBuffer[location]);
 	glBindTexture(GL_TEXTURE_2D, colorBuffer[location]);
 	glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + format, colorBuffer[0], 0);
+	if (location == 0)
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorBuffer[0], 0);
+	if (location == 1)
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, colorBuffer[1], 0);
+	if (location == 2)
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, colorBuffer[2], 0);
 }
 
 void ilgl::FrameBuffer::addDepthAttachment()

@@ -2,9 +2,9 @@
 layout(location = 0) out vec4 FragColor;
 in vec2 UV;
 
-uniform sampler2D _gWorldPos;
-uniform sampler2D _gWorldNormal;
-uniform sampler2D _gAlbedo;
+uniform layout(binding = 0) sampler2D _gWorldPos;
+uniform layout(binding = 1) sampler2D _gWorldNormal;
+uniform layout(binding = 2) sampler2D _gAlbedo;
 
 struct Material {
 	float Ka; //Ambient coefficient (0-1)
@@ -16,8 +16,6 @@ uniform Material _Material;
 
 uniform sampler2D _MainTex; 
 uniform sampler2D _ShadowMap;
-
-in vec4 LightSpacePos;
 
 uniform float _MaxBias;
 uniform float _MinBias;
@@ -56,21 +54,10 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldNormal)
 
 void main()
 {
-	vec3 worldPos = texture(_gWorldPos,UV).rgb;
-	vec3 albedo = texture(_gAlbedo, UV).rgb;
-	vec3 normal = texture(_gWorldNormal,UV).rgb;
+	vec3 worldPos = texture(_gWorldPos, UV).xyz;
+	vec3 albedo = texture(_gAlbedo, UV).rbg;
+	vec3 normal = texture(_gWorldNormal, UV).xyz;
 
-	vec3 toLight = -_LightDirection;
-	float diffuseFactor = max(dot(normal,toLight),0.0);
-	//Calculate specularly reflected light
-	vec3 toEye = normalize(_EyePos - worldPos);
-	//Blinn-phong uses half angle
-	vec3 h = normalize(toLight + toEye);
-	float specularFactor = pow(max(dot(normal,h),0.0),_Material.Shininess);
-	//Combination of specular and diffuse reflection
-	float shadow = calcShadow(_ShadowMap, LightSpacePos, normal);
-	vec3 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * _LightColor * (1.0 - shadow);
-	//Add in ambient color after the shadow effected lighting
-	lightColor += _AmbientColor * _Material.Ka;
-	FragColor = vec4(albedo * lightColor,1.0);
+	vec3 lightColor = vec3 (1.0,1.0,1.0);
+	FragColor = vec4(albedo, 1.0);
 }

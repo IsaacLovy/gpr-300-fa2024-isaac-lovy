@@ -57,6 +57,7 @@ GLuint colorTexture;
 GLuint normalTexture;
 
 ilgl::FrameBuffer shadowMapBuffer;
+ilgl::FrameBuffer gBuffer;
 
 glm::vec3 lightDir = glm::vec3(0, -1, 0);
 
@@ -67,7 +68,7 @@ ew::CameraController cameraController;
 ew::Camera camera;
 
 int main() {
-	GLFWwindow* window = initWindow("Assignment 1", screenWidth, screenHeight);
+	GLFWwindow* window = initWindow("Assignment 3", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	lightCam.orthographic = true;
@@ -79,6 +80,7 @@ int main() {
 
 	//ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
 	ew::Shader gBufferShader = ew::Shader("assets/lit.vert", "assets/geometryPass.frag");
+
 	//ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
 	ew::Shader depthOnlyShader = ew::Shader("assets/depthOnly.vert", "assets/depthOnly.frag");
 	ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
@@ -109,12 +111,12 @@ int main() {
 	//Setup for ShadowMap
 	shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight, true);
 
-	ilgl::FrameBuffer gBufffer = ilgl::FrameBuffer();
-	gBufffer.setResolution(screenWidth, screenHeight);
-	gBufffer.addAttachment(0, GL_RGB32F);
-	gBufffer.addAttachment(1, GL_RGB16F);
-	gBufffer.addAttachment(2, GL_RGB8);
-	gBufffer.addDepthAttachment();
+	gBuffer = ilgl::FrameBuffer();
+	gBuffer.setResolution(screenWidth, screenHeight);
+	gBuffer.addAttachment(0, GL_RGB32F);
+	gBuffer.addAttachment(1, GL_RGB16F);
+	gBuffer.addAttachment(2, GL_RGB8);
+	gBuffer.addDepthAttachment();
 
 	//Setup for Camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -147,13 +149,16 @@ int main() {
 		glDepthFunc(GL_LEQUAL);
 
 		//Shadow Pass
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.getFBO());
+		glClearColor(0.0, 0.0, 0.0, 1.0);
 		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
 
 		//Geometry Pass
-		glBindFramebuffer(GL_FRAMEBUFFER, gBufffer.getFBO());
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.getFBO());
+		glViewport(0, 0, screenWidth, screenHeight);
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.drawScene(camera, lightCam);
@@ -163,22 +168,16 @@ int main() {
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		deferredLitShader.use();
-		glBindTextureUnit(0, gBufffer.getColorTexture(0));
-		glBindTextureUnit(1, gBufffer.getColorTexture(1));
-		glBindTextureUnit(2, gBufffer.getColorTexture(2));
-		glBindTextureUnit(3, gBufffer.getDepthBuffer());
-		deferredLitShader.setInt("_gWorldPos", 0);
-		deferredLitShader.setInt("_gWorldNormal", 1);
-		deferredLitShader.setInt("_gAlbedo", 2);
+		glBindTextureUnit(0, gBuffer.getColorTexture(0));
+		glBindTextureUnit(1, gBuffer.getColorTexture(1));
+		glBindTextureUnit(2, gBuffer.getColorTexture(2));
+		glBindTextureUnit(3, gBuffer.getDepthBuffer());
 		deferredLitShader.setInt("_ShadowMap", 3);
-		scene.setShadowBiasMinMax(shadowMinBias, shadowMaxBias);
-		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Draw to screen
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
 		drawUI(&camera, &cameraController);
 
@@ -211,29 +210,29 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::DragFloat("Min Bias", &shadowMinBias, .001f, 0.0f, 0.2);
 	}
 
-	if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
-	{
-		if (glm::length(lightDir) != 0)
-		{
-			lightDir = glm::normalize(lightDir);
-		}
-	}
+	//if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
+	//{
+	//	if (glm::length(lightDir) != 0)
+	//	{
+	//		lightDir = glm::normalize(lightDir);
+	//	}
+	//}
 
-	if (ImGui::CollapsingHeader("Post Process")) {
-		if (ImGui::CollapsingHeader("Vignette"))
-		{
-			ImGui::Checkbox("Vignette On/Off", &vignetteEffect);
-			ImGui::SliderFloat("Vignette Distance", &vignette_Intensity, 0.0f, 25.0f);
-			ImGui::SliderFloat("Vignette Intensity", &vignette_Distance, 0.0f, 1);
-		}
-		if (ImGui::CollapsingHeader("Aberration"))
-		{
-			ImGui::Checkbox("Aberration On/Off", &aberrationEffect);
-			ImGui::SliderFloat("Aberration R", &rOffset, -.01f, .01f);
-			ImGui::SliderFloat("Aberration G", &gOffset, -.01f, .01f);
-			ImGui::SliderFloat("Aberration B", &bOffset, -.01f, .01f);
-		}
-	}
+	//if (ImGui::CollapsingHeader("Post Process")) {
+	//	if (ImGui::CollapsingHeader("Vignette"))
+	//	{
+	//		ImGui::Checkbox("Vignette On/Off", &vignetteEffect);
+	//		ImGui::SliderFloat("Vignette Distance", &vignette_Intensity, 0.0f, 25.0f);
+	//		ImGui::SliderFloat("Vignette Intensity", &vignette_Distance, 0.0f, 1);
+	//	}
+	//	if (ImGui::CollapsingHeader("Aberration"))
+	//	{
+	//		ImGui::Checkbox("Aberration On/Off", &aberrationEffect);
+	//		ImGui::SliderFloat("Aberration R", &rOffset, -.01f, .01f);
+	//		ImGui::SliderFloat("Aberration G", &gOffset, -.01f, .01f);
+	//		ImGui::SliderFloat("Aberration B", &bOffset, -.01f, .01f);
+	//	}
+	//}
 	
 	if (ImGui::Button("Reset Camera")) {
 		resetCamera(camera, cameraController);
@@ -245,8 +244,13 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	ImGui::Begin("Shadow Map");
 	ImGui::BeginChild("Shadow Map");
 	ImVec2 windowSize = ImGui::GetWindowSize();
+	
+	ImVec2 texSize = ImVec2(screenWidth / 4, screenHeight / 4);
+	for (size_t i = 0; i < 3; i++)
+	{
+		ImGui::Image((ImTextureID)gBuffer.getColorTexture(i), texSize, ImVec2(0, 1), ImVec2(1, 0));
+	}
 
-	ImGui::Image((ImTextureID)shadowMapBuffer.getDepthBuffer(), windowSize, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::EndChild();
 	ImGui::End();
 

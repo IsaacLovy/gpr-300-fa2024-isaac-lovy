@@ -1,4 +1,4 @@
-#version 460 core
+#version 450 core
 layout (location = 0) in vec3 vPos;
 uniform mat4 _ViewProjection;
 uniform mat4 _Model;
