@@ -149,8 +149,8 @@ int main() {
 		glDepthFunc(GL_LEQUAL);
 
 		//Shadow Pass
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.getFBO());
-		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapBuffer.getFBO());
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
@@ -159,8 +159,9 @@ int main() {
 		//Geometry Pass
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.getFBO());
 		glViewport(0, 0, screenWidth, screenHeight);
-		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		gBuffer.use();
 		scene.drawScene(camera, lightCam);
 
 		//Lighting Pass
@@ -171,8 +172,7 @@ int main() {
 		glBindTextureUnit(0, gBuffer.getColorTexture(0));
 		glBindTextureUnit(1, gBuffer.getColorTexture(1));
 		glBindTextureUnit(2, gBuffer.getColorTexture(2));
-		glBindTextureUnit(3, gBuffer.getDepthBuffer());
-		deferredLitShader.setInt("_ShadowMap", 3);
+		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
 
 		// Draw to screen
 		glBindVertexArray(dummyVAO);
