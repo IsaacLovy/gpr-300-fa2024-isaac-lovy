@@ -110,13 +110,19 @@ int main() {
 
 	//Setup for ShadowMap
 	shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight, true);
+	shadowMapBuffer.checkValidity();
 
 	gBuffer = ilgl::FrameBuffer();
 	gBuffer.setResolution(screenWidth, screenHeight);
+	gBuffer.use();
 	gBuffer.addAttachment(0, GL_RGB32F);
 	gBuffer.addAttachment(1, GL_RGB16F);
 	gBuffer.addAttachment(2, GL_RGB8);
 	gBuffer.addDepthAttachment();
+
+	gBuffer.checkValidity();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//Setup for Camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -149,18 +155,12 @@ int main() {
 		glDepthFunc(GL_LEQUAL);
 
 		//Shadow Pass
-		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapBuffer.getFBO());
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
 
 		//Geometry Pass
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.getFBO());
-		glViewport(0, 0, screenWidth, screenHeight);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		gBuffer.use();
 		scene.drawScene(camera, lightCam);
 
@@ -173,11 +173,9 @@ int main() {
 		glBindTextureUnit(1, gBuffer.getColorTexture(1));
 		glBindTextureUnit(2, gBuffer.getColorTexture(2));
 		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
-
 		// Draw to screen
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
 
 		drawUI(&camera, &cameraController);
 
@@ -250,6 +248,8 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	{
 		ImGui::Image((ImTextureID)gBuffer.getColorTexture(i), texSize, ImVec2(0, 1), ImVec2(1, 0));
 	}
+
+	//ImGui::Image((ImTextureID)shadowMapBuffer.getDepthBuffer(), texSize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::EndChild();
 	ImGui::End();

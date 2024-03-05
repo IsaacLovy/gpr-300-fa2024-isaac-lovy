@@ -61,6 +61,22 @@ ilgl::FrameBuffer::~FrameBuffer()
 {
 }
 
+bool ilgl::FrameBuffer::checkValidity()
+{
+	GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+	{
+		printf("Frame Buffer Incomplete: %d", fboStatus);
+		return false;
+	}
+
+	const GLenum drawBuffers[3] = {
+		colorBuffer[0], colorBuffer[1], colorBuffer[2]
+	};
+
+	return true;
+}
+
 void ilgl::FrameBuffer::setResolution(int width, int height)
 {
 	this->height = height;
@@ -72,12 +88,7 @@ void ilgl::FrameBuffer::addAttachment(int location, unsigned int format)
 	glGenTextures(1, &colorBuffer[location]);
 	glBindTexture(GL_TEXTURE_2D, colorBuffer[location]);
 	glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
-	if (location == 0)
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorBuffer[0], 0);
-	if (location == 1)
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, colorBuffer[1], 0);
-	if (location == 2)
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, colorBuffer[2], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + location, colorBuffer[location], 0);
 }
 
 void ilgl::FrameBuffer::addDepthAttachment()
@@ -90,12 +101,6 @@ void ilgl::FrameBuffer::addDepthAttachment()
 
 void ilgl::FrameBuffer::use()
 {
-	GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
-	{
-		printf("Frame Buffer Incomplete: %d", fboStatus);
-		return;
-	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glViewport(0, 0, width, height);
