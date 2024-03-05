@@ -169,6 +169,7 @@ int main() {
 		glBindTextureUnit(1, gBuffer.getColorTexture(1));
 		glBindTextureUnit(2, gBuffer.getColorTexture(2));
 		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
+		deferredLitShader.setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
 		// Draw to screen
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -204,13 +205,13 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::DragFloat("Min Bias", &shadowMinBias, .001f, 0.0f, 0.2);
 	}
 
-	//if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
-	//{
-	//	if (glm::length(lightDir) != 0)
-	//	{
-	//		lightDir = glm::normalize(lightDir);
-	//	}
-	//}
+	if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
+	{
+		if (glm::length(lightDir) != 0)
+		{
+			lightDir = glm::normalize(lightDir);
+		}
+	}
 
 	//if (ImGui::CollapsingHeader("Post Process")) {
 	//	if (ImGui::CollapsingHeader("Vignette"))
@@ -245,7 +246,7 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::Image((ImTextureID)gBuffer.getColorTexture(i), texSize, ImVec2(0, 1), ImVec2(1, 0));
 	}
 
-	//ImGui::Image((ImTextureID)shadowMapBuffer.getDepthBuffer(), texSize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)shadowMapBuffer.getDepthBuffer(), ImVec2(shadowWidth / 4, shadowHeight / 4), ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::EndChild();
 	ImGui::End();
