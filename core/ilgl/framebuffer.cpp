@@ -71,8 +71,9 @@ bool ilgl::FrameBuffer::checkValidity()
 	}
 
 	const GLenum drawBuffers[3] = {
-		colorBuffer[0], colorBuffer[1], colorBuffer[2]
+		GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
 	};
+	glDrawBuffers(3, drawBuffers);
 
 	return true;
 }
@@ -101,12 +102,10 @@ void ilgl::FrameBuffer::addDepthAttachment()
 
 void ilgl::FrameBuffer::use()
 {
-
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glViewport(0, 0, width, height);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 }
 
 int ilgl::FrameBuffer::getColorTexture(int location)

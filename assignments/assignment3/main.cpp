@@ -143,11 +143,7 @@ int main() {
 
 		cameraController.move(window, &camera, deltaTime);
 
-		//Rotate model around Y axis
-		//monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
-
 		//RENDER
-
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
