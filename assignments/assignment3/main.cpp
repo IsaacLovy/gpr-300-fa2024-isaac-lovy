@@ -114,6 +114,7 @@ int main() {
 
 	gBuffer = ilgl::FrameBuffer();
 	gBuffer.setResolution(screenWidth, screenHeight);
+	gBuffer.initialize();
 	gBuffer.use();
 	gBuffer.addAttachment(0, GL_RGB32F);
 	gBuffer.addAttachment(1, GL_RGB16F);
@@ -121,6 +122,7 @@ int main() {
 	gBuffer.addDepthAttachment();
 
 	gBuffer.checkValidity();
+	gBuffer.finalize();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

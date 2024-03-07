@@ -61,6 +61,19 @@ ilgl::FrameBuffer::~FrameBuffer()
 {
 }
 
+void ilgl::FrameBuffer::initialize()
+{
+	glCreateFramebuffers(1, &fbo);
+}
+
+void ilgl::FrameBuffer::finalize()
+{
+	const GLenum drawBuffers[3] = {
+		GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
+	};
+	glDrawBuffers(3, drawBuffers);
+}
+
 bool ilgl::FrameBuffer::checkValidity()
 {
 	GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -69,11 +82,6 @@ bool ilgl::FrameBuffer::checkValidity()
 		printf("Frame Buffer Incomplete: %d", fboStatus);
 		return false;
 	}
-
-	const GLenum drawBuffers[3] = {
-		GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
-	};
-	glDrawBuffers(3, drawBuffers);
 
 	return true;
 }

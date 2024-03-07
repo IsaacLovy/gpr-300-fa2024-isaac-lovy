@@ -59,8 +59,8 @@ vec3 calcLighting(vec3 worldPos, vec3 normal)
 void main()
 {
 	vec3 worldPos = texture(_gWorldPos, UV).xyz;
-	vec3 albedo = texture(_gAlbedo, UV).rgb;
 	vec3 normal = texture(_gWorldNormal, UV).xyz;
+	vec3 albedo = texture(_gAlbedo, UV).rgb;
 
 	vec3 lightColor = calcLighting(worldPos, normal);
 	FragColor = vec4(albedo * lightColor, 1.0);

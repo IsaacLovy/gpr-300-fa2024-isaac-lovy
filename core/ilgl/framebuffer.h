@@ -12,6 +12,8 @@ namespace ilgl
 		FrameBuffer(int width, int height, bool isShadow = false);
 		~FrameBuffer();
 
+		void initialize();
+		void finalize();
 		bool checkValidity();
 		void setResolution(int width, int height);
 		void addAttachment(int location, unsigned int format);
