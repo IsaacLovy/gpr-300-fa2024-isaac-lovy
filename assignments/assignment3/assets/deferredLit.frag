@@ -34,7 +34,7 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
 	{
 		for(int x = -1; x<=1; x++)
 		{
-			vec2 uv = sampleCoord.xy + vec2(x* texelOffset.x, y * texelOffset.y);
+			vec2 uv = sampleCoord.xy + vec2(x * texelOffset.x, y * texelOffset.y);
 			totalShadow += step(texture(_ShadowMap, uv).r, myDepth);
 		}
 	}
@@ -46,7 +46,6 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
 
 vec3 calcLighting(vec3 worldPos, vec3 normal)
 {
-
 	vec4 lightSpacePos = _LightViewProj * vec4(worldPos, 1.0);
 	
 	float shadow = calcShadow(_ShadowMap, lightSpacePos, normal);
@@ -58,8 +57,8 @@ vec3 calcLighting(vec3 worldPos, vec3 normal)
 
 void main()
 {
-	vec3 worldPos = texture(_gWorldPos, UV).xyz;
-	vec3 normal = texture(_gWorldNormal, UV).xyz;
+	vec3 worldPos = texture(_gWorldPos, UV).rgb;
+	vec3 normal = texture(_gWorldNormal, UV).rgb;
 	vec3 albedo = texture(_gAlbedo, UV).rgb;
 
 	vec3 lightColor = calcLighting(worldPos, normal);
