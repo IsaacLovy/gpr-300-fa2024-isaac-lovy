@@ -16,6 +16,43 @@ uniform vec3 _AmbientColor = vec3(0.2,0.2,0.2);
 uniform float _MaxBias;
 uniform float _MinBias;
 
+struct Material {
+	float Ka; //Ambient coefficient (0-1)
+	float Kd; //Diffuse coefficient (0-1)
+	float Ks; //Specular coefficient (0-1)
+	float Shininess; //Affects size of specular highlight
+};
+uniform Material _Material;
+
+struct PointLight{
+	vec3 position;
+	float radius;
+	vec4 color;
+};
+
+#define MAX_POINT_LIGHTS 64
+
+uniform PointLight _PointLights[MAX_POINT_LIGHTS];
+
+float attenuateExponential(float distance, float radius){
+	float i = clamp(1.0 - pow(distance/radius,4.0),0.0,1.0);
+	return i * i;	
+}
+
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 pos){
+	vec3 diff = light.position - pos;
+	vec3 toLight = normalize(diff);
+	vec3 toEye = normalize(pos - _EyePos);
+	float diffuseFactor = max(dot(normal,toLight),0.0);
+	vec3 h = normalize(toLight + toEye);
+	float specularFactor = pow(max(dot(normal,h),0.0),_Material.Shininess);
+	vec4 lightColor = (diffuseFactor + specularFactor) * light.color;
+	float d = length(diff);
+	lightColor *= attenuateExponential(d, light.radius);
+	return lightColor.rgb;
+
+}
+
 float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
 {
 
@@ -61,6 +98,13 @@ void main()
 	vec3 normal = texture(_gWorldNormal, UV).rgb;
 	vec3 albedo = texture(_gAlbedo, UV).rgb;
 
-	vec3 lightColor = calcLighting(worldPos, normal);
+	vec3 totalLight = vec3(0);
+
+	for (int i = 0; i < MAX_POINT_LIGHTS; i ++)
+	{
+		totalLight+=calcPointLight(_PointLights[i], normal, worldPos);
+	}
+
+	vec3 lightColor = totalLight; //calcLighting(worldPos, normal);
 	FragColor = vec4(albedo * lightColor, 1.0);
 }

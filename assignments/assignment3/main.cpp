@@ -58,6 +58,7 @@ GLuint normalTexture;
 
 ilgl::FrameBuffer shadowMapBuffer;
 ilgl::FrameBuffer gBuffer;
+ilgl::FrameBuffer framebuffer;
 
 glm::vec3 lightDir = glm::vec3(0, -1, 0);
 
@@ -66,6 +67,14 @@ float lightCamDist = 5.0f;
 
 ew::CameraController cameraController;
 ew::Camera camera;
+
+struct PointLight {
+	float radius;
+	glm::vec4 color;
+	ew::Transform transform;
+};
+
+const int MAX_POINT_LIGHTS = 64;
 
 int main() {
 	GLFWwindow* window = initWindow("Assignment 3", screenWidth, screenHeight);
@@ -84,6 +93,9 @@ int main() {
 	//ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
 	ew::Shader depthOnlyShader = ew::Shader("assets/depthOnly.vert", "assets/depthOnly.frag");
 	ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
+	ew::Shader fullTex = ew::Shader("assets/fullquad.vert", "assets/fullTex.frag");
+
+	ew::Shader lightOrbShader = ew::Shader("assets/lightOrb.vert", "assets/lightOrb.frag");
 
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
 	ew::Transform monkeyTransform;
@@ -91,6 +103,29 @@ int main() {
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
 	ew::Transform groundTransform;
 	groundTransform.position = glm::vec3(0, -1, 0);
+
+	ew::Model pointSphere = ew::Model(ew::createSphere(0.25f, 16));
+	PointLight points[MAX_POINT_LIGHTS];
+
+	int lightSpacing = 2;
+	int x = -20, z = -20;
+	int y = 0.5f;
+
+	for (int i = 0; i < MAX_POINT_LIGHTS; i++)
+	{
+		if (i % 8 == 0)
+		{
+			z += lightSpacing;
+			x = -20;
+		}
+		else
+		{
+			x += lightSpacing;
+		}
+		points[i].transform.position = glm::vec3(x, y, z);
+		points[i].radius = 5;
+		points[i].color = glm::vec4(.6f, .6f, .6f, 1.0f);
+	}
 
 	ilgl::Material monketMat;
 	monketMat.Ka = 0.4;
@@ -123,6 +158,12 @@ int main() {
 
 	gBuffer.checkValidity();
 	gBuffer.finalize();
+
+	framebuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
+	framebuffer.addAttachment(0, GL_RGB32F);
+	framebuffer.addDepthAttachment();
+	framebuffer.checkValidity();
+	framebuffer.finalize();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -163,16 +204,53 @@ int main() {
 		scene.drawScene(camera, lightCam);
 
 		//Lighting Pass
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		framebuffer.use();
 		deferredLitShader.use();
 		glBindTextureUnit(0, gBuffer.getColorTexture(0));
 		glBindTextureUnit(1, gBuffer.getColorTexture(1));
 		glBindTextureUnit(2, gBuffer.getColorTexture(2));
 		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
 		deferredLitShader.setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
+		deferredLitShader.setFloat("_Material.Ka", monketMat.Ka);
+		deferredLitShader.setFloat("_Material.Kd", monketMat.Kd);
+		deferredLitShader.setFloat("_Material.Ks", monketMat.Ks);
+		deferredLitShader.setFloat("_Material.Shininess", monketMat.Shininess);
+		for (int i = 0; i < MAX_POINT_LIGHTS; i++)
+		{
+			std::string prefix = "_PointLights" + std::to_string(i) + "].";
+			deferredLitShader.setVec3(prefix + "position", points[i].transform.position);
+			deferredLitShader.setFloat(prefix + "radius", points[i].radius);
+			deferredLitShader.setVec4(prefix + "color", points[i].color);
+		}
 		// Draw to screen
+		glBindVertexArray(dummyVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//DRAW POINTS
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.getFBO()); //Read from gBuffer 
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer.getFBO()); //Write to current fbo
+		glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		
+		lightOrbShader.use();
+		lightOrbShader.setMat4("_ViewProjection", camera.projectionMatrix()* camera.viewMatrix());
+		for (int i = 0; i < MAX_POINT_LIGHTS; i++)
+		{
+			glm::mat4 m = glm::mat4(1.0f);
+			m = glm::translate(m, points[i].transform.position);
+			m = glm::scale(m, points[i].transform.scale); //Whatever radius you want
+
+			lightOrbShader.setMat4("_Model", m);
+			lightOrbShader.setVec3("_Color", points[i].color);
+			pointSphere.draw();
+		}
+
+		//second fullscreen quad / Post process
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0, 0, 0, 1.0f);
+		fullTex.use();
+		glBindTextureUnit(0, framebuffer.getColorTexture(0));
+		fullTex.setInt("_ColorBuffer", 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
