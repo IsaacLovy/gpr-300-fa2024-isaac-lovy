@@ -15,7 +15,6 @@ uniform sampler2D _MainTex;
 
 void main(){
 	gWorldPos = fs_in.WorldPos;
-	//Or read from normal map + convert to worldspace
 	gWorldNormal = normalize(fs_in.WorldNormal);
-	gAlbedo = texture(_MainTex,fs_in.TexCoord).rgb;
+	gAlbedo = texture(_MainTex, fs_in.TexCoord).rgb;
 }

@@ -10,8 +10,10 @@ layout(binding = 3) uniform sampler2D _ShadowMap;
 uniform vec3 _EyePos;
 uniform vec4 _LightViewProj;
 uniform vec3 _LightDirection = vec3(0.0,-1.0,0.0);
-uniform vec3 _LightColor = vec3(1.0);
 uniform vec3 _AmbientColor = vec3(0.2,0.2,0.2);
+uniform vec4 _DirLightColor = vec4(0.5, 0.5, 0.5, 1.0);
+
+uniform float _PointIntensity = 1.0;
 
 uniform float _MaxBias;
 uniform float _MinBias;
@@ -34,8 +36,8 @@ struct PointLight{
 
 uniform PointLight _PointLights[MAX_POINT_LIGHTS];
 
-float attenuateExponential(float distance, float radius){
-	float i = clamp(1.0 - pow(distance/radius,4.0),0.0,1.0);
+float attenuateExponential(float dist, float radius){
+	float i = clamp(1.0 - pow(dist/radius,4.0),0.0,1.0);
 	return i * i;	
 }
 
@@ -50,12 +52,10 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 pos){
 	float d = length(diff);
 	lightColor *= attenuateExponential(d, light.radius);
 	return lightColor.rgb;
-
 }
 
 float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
 {
-
 	vec3 sampleCoord = lightSpacePos.xyz / lightSpacePos.w;
 	sampleCoord = sampleCoord * 0.5 + 0.5;
 	float bias = max(_MaxBias * (1.0 - dot(worldnormal, -_LightDirection)), _MinBias);
@@ -83,11 +83,12 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
 
 vec3 calcLighting(vec3 worldPos, vec3 normal)
 {
+	//Missing step = to model matrix
 	vec4 lightSpacePos = _LightViewProj * vec4(worldPos, 1.0);
 	
 	float shadow = calcShadow(_ShadowMap, lightSpacePos, normal);
 	
-	vec3 lightColor = _LightColor * (1.0 - shadow);
+	vec3 lightColor = _DirLightColor.rgb * (1.0 - shadow);
 
 	return lightColor;
 }
@@ -100,11 +101,11 @@ void main()
 
 	vec3 totalLight = vec3(0);
 
+	totalLight += calcLighting(worldPos, normal);
 	for (int i = 0; i < MAX_POINT_LIGHTS; i ++)
 	{
-		totalLight+=calcPointLight(_PointLights[i], normal, worldPos);
+		totalLight+=calcPointLight(_PointLights[i], normal, worldPos) * _PointIntensity;
 	}
 
-	vec3 lightColor = totalLight; //calcLighting(worldPos, normal);
-	FragColor = vec4(albedo * lightColor, 1.0);
+	FragColor = vec4(albedo * totalLight, 1.0);
 }

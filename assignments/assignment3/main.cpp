@@ -64,6 +64,8 @@ glm::vec3 lightDir = glm::vec3(0, -1, 0);
 
 ew::Camera lightCam;
 float lightCamDist = 5.0f;
+glm::vec3 dirLightColor = glm::vec3(0.5f, 0.5f, 0.5f);
+float pointLightIntensity = 1;
 
 ew::CameraController cameraController;
 ew::Camera camera;
@@ -75,6 +77,15 @@ struct PointLight {
 };
 
 const int MAX_POINT_LIGHTS = 64;
+
+glm::vec4 randomColor()
+{
+	float r = rand() / ((float)RAND_MAX + 1);
+	float g = rand() / ((float)RAND_MAX + 1);
+	float b = rand() / ((float)RAND_MAX + 1);
+
+	return glm::vec4(r, g, b, 1.0f);
+}
 
 int main() {
 	GLFWwindow* window = initWindow("Assignment 3", screenWidth, screenHeight);
@@ -108,7 +119,7 @@ int main() {
 	PointLight points[MAX_POINT_LIGHTS];
 
 	int lightSpacing = 2;
-	int x = -20, z = -20;
+	int x = -8, z = -8;
 	int y = 0.5f;
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; i++)
@@ -116,7 +127,7 @@ int main() {
 		if (i % 8 == 0)
 		{
 			z += lightSpacing;
-			x = -20;
+			x = -8;
 		}
 		else
 		{
@@ -124,7 +135,7 @@ int main() {
 		}
 		points[i].transform.position = glm::vec3(x, y, z);
 		points[i].radius = 5;
-		points[i].color = glm::vec4(.6f, .6f, .6f, 1.0f);
+		points[i].color = randomColor();
 	}
 
 	ilgl::Material monketMat;
@@ -211,13 +222,15 @@ int main() {
 		glBindTextureUnit(2, gBuffer.getColorTexture(2));
 		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
 		deferredLitShader.setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
+		deferredLitShader.setVec3("_DirLightColor", dirLightColor);
+		deferredLitShader.setFloat("_PointIntensity", pointLightIntensity);
 		deferredLitShader.setFloat("_Material.Ka", monketMat.Ka);
 		deferredLitShader.setFloat("_Material.Kd", monketMat.Kd);
 		deferredLitShader.setFloat("_Material.Ks", monketMat.Ks);
 		deferredLitShader.setFloat("_Material.Shininess", monketMat.Shininess);
 		for (int i = 0; i < MAX_POINT_LIGHTS; i++)
 		{
-			std::string prefix = "_PointLights" + std::to_string(i) + "].";
+			std::string prefix = "_PointLights[" + std::to_string(i) + "].";
 			deferredLitShader.setVec3(prefix + "position", points[i].transform.position);
 			deferredLitShader.setFloat(prefix + "radius", points[i].radius);
 			deferredLitShader.setVec4(prefix + "color", points[i].color);
@@ -292,6 +305,8 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 			lightDir = glm::normalize(lightDir);
 		}
 	}
+	ImGui::ColorPicker4("Directional Light Color", &dirLightColor.x);
+	ImGui::DragFloat("Point Light Intensity", &pointLightIntensity, 0.01f, 0.0f, 1.0f);
 
 	//if (ImGui::CollapsingHeader("Post Process")) {
 	//	if (ImGui::CollapsingHeader("Vignette"))
