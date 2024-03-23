@@ -9,9 +9,9 @@ layout(binding = 3) uniform sampler2D _ShadowMap;
 
 uniform vec3 _EyePos;
 uniform vec4 _LightViewProj;
-uniform vec3 _LightDirection = vec3(0.0,-1.0,0.0);
+uniform vec3 _LightDirection;
 uniform vec3 _AmbientColor = vec3(0.2,0.2,0.2);
-uniform vec4 _DirLightColor = vec4(0.5, 0.5, 0.5, 1.0);
+uniform vec3 _DirLightColor = vec3(0.5, 0.5, 0.5);
 
 uniform float _PointIntensity = 1.0;
 
@@ -48,17 +48,17 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 pos){
 	float diffuseFactor = max(dot(normal,toLight),0.0);
 	vec3 h = normalize(toLight + toEye);
 	float specularFactor = pow(max(dot(normal,h),0.0),_Material.Shininess);
-	vec4 lightColor = (diffuseFactor + specularFactor) * light.color;
+	vec4 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * light.color;
 	float d = length(diff);
 	lightColor *= attenuateExponential(d, light.radius);
 	return lightColor.rgb;
 }
 
-float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
+float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldNormal)
 {
 	vec3 sampleCoord = lightSpacePos.xyz / lightSpacePos.w;
 	sampleCoord = sampleCoord * 0.5 + 0.5;
-	float bias = max(_MaxBias * (1.0 - dot(worldnormal, -_LightDirection)), _MinBias);
+	float bias = max(_MaxBias * (1.0 - dot(worldNormal, -_LightDirection)), _MinBias);
 	float myDepth = sampleCoord.z - bias;
 
 	if (myDepth > 1) return 0;
@@ -81,14 +81,20 @@ float calcShadow(sampler2D shadowMap, vec4 lightSpacePos, vec3 worldnormal)
 	return totalShadow;
 }
 
-vec3 calcLighting(vec3 worldPos, vec3 normal)
+vec3 calcDirLighting(vec3 worldPos, vec3 normal)
 {
-	//Missing step = to model matrix
 	vec4 lightSpacePos = _LightViewProj * vec4(worldPos, 1.0);
 	
 	float shadow = calcShadow(_ShadowMap, lightSpacePos, normal);
 	
-	vec3 lightColor = _DirLightColor.rgb * (1.0 - shadow);
+	vec3 toLight = -_LightDirection;
+
+	float diffuseFactor = max(dot(normal,toLight),0.0);
+	vec3 toEye = normalize(_EyePos - worldPos);
+	vec3 h = normalize(toLight + toEye);
+	float specularFactor = pow(max(dot(normal,h),0.0),_Material.Shininess);
+	
+	vec3 lightColor = (_Material.Kd * diffuseFactor + _Material.Ks * specularFactor) * _DirLightColor * (1.0 - shadow);
 
 	return lightColor;
 }
@@ -101,11 +107,12 @@ void main()
 
 	vec3 totalLight = vec3(0);
 
-	totalLight += calcLighting(worldPos, normal);
+	totalLight += calcDirLighting(worldPos, normal);
+
 	for (int i = 0; i < MAX_POINT_LIGHTS; i ++)
 	{
 		totalLight+=calcPointLight(_PointLights[i], normal, worldPos) * _PointIntensity;
 	}
 
-	FragColor = vec4(albedo * totalLight, 1.0);
+	FragColor = vec4(albedo * totalLight,0);
 }

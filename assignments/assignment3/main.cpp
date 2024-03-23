@@ -115,7 +115,7 @@ int main() {
 	ew::Transform groundTransform;
 	groundTransform.position = glm::vec3(0, -1, 0);
 
-	ew::Model pointSphere = ew::Model(ew::createSphere(0.25f, 16));
+	ew::Model pointSphere = ew::Model(ew::createSphere(0.1f, 8));
 	PointLight points[MAX_POINT_LIGHTS];
 
 	int lightSpacing = 2;
@@ -198,6 +198,7 @@ int main() {
 		cameraController.move(window, &camera, deltaTime);
 
 		//RENDER
+		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
@@ -221,6 +222,8 @@ int main() {
 		glBindTextureUnit(1, gBuffer.getColorTexture(1));
 		glBindTextureUnit(2, gBuffer.getColorTexture(2));
 		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
+		deferredLitShader.setVec3("_EyePos", lightCam.position);
+		deferredLitShader.setVec3("_LightDirection", lightDir);
 		deferredLitShader.setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
 		deferredLitShader.setVec3("_DirLightColor", dirLightColor);
 		deferredLitShader.setFloat("_PointIntensity", pointLightIntensity);
@@ -228,6 +231,8 @@ int main() {
 		deferredLitShader.setFloat("_Material.Kd", monketMat.Kd);
 		deferredLitShader.setFloat("_Material.Ks", monketMat.Ks);
 		deferredLitShader.setFloat("_Material.Shininess", monketMat.Shininess);
+		deferredLitShader.setFloat("_MinBias", shadowMinBias);
+		deferredLitShader.setFloat("_MaxBias", shadowMaxBias);
 		for (int i = 0; i < MAX_POINT_LIGHTS; i++)
 		{
 			std::string prefix = "_PointLights[" + std::to_string(i) + "].";
