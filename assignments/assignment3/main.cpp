@@ -70,6 +70,8 @@ float pointLightIntensity = 1;
 ew::CameraController cameraController;
 ew::Camera camera;
 
+bool drawPointLightSpheres = true;
+
 struct PointLight {
 	float radius;
 	glm::vec4 color;
@@ -249,20 +251,23 @@ int main() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer.getFBO()); //Write to current fbo
 		glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		
-		lightOrbShader.use();
-		lightOrbShader.setMat4("_ViewProjection", camera.projectionMatrix()* camera.viewMatrix());
-		for (int i = 0; i < MAX_POINT_LIGHTS; i++)
+		if (drawPointLightSpheres)
 		{
-			glm::mat4 m = glm::mat4(1.0f);
-			m = glm::translate(m, points[i].transform.position);
-			m = glm::scale(m, points[i].transform.scale); //Whatever radius you want
+			lightOrbShader.use();
+			lightOrbShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+			for (int i = 0; i < MAX_POINT_LIGHTS; i++)
+			{
+				glm::mat4 m = glm::mat4(1.0f);
+				m = glm::translate(m, points[i].transform.position);
+				m = glm::scale(m, points[i].transform.scale); //Whatever radius you want
 
-			lightOrbShader.setMat4("_Model", m);
-			lightOrbShader.setVec3("_Color", points[i].color);
-			pointSphere.draw();
+				lightOrbShader.setMat4("_Model", m);
+				lightOrbShader.setVec3("_Color", points[i].color);
+				pointSphere.draw();
+			}
 		}
 
-		//second fullscreen quad / Post process
+		//second full screen quad / Post process
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0, 0, 0, 1.0f);
 		fullTex.use();
@@ -312,6 +317,8 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	}
 	ImGui::ColorPicker4("Directional Light Color", &dirLightColor.x);
 	ImGui::DragFloat("Point Light Intensity", &pointLightIntensity, 0.01f, 0.0f, 1.0f);
+
+	ImGui::Checkbox("Render Point Light Spheres", &drawPointLightSpheres);
 
 	//if (ImGui::CollapsingHeader("Post Process")) {
 	//	if (ImGui::CollapsingHeader("Vignette"))

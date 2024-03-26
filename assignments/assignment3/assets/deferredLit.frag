@@ -8,7 +8,7 @@ layout(binding = 2) uniform sampler2D _gAlbedo;
 layout(binding = 3) uniform sampler2D _ShadowMap;
 
 uniform vec3 _EyePos;
-uniform vec4 _LightViewProj;
+uniform mat4 _LightViewProj;
 uniform vec3 _LightDirection;
 uniform vec3 _AmbientColor = vec3(0.2,0.2,0.2);
 uniform vec3 _DirLightColor = vec3(0.5, 0.5, 0.5);
