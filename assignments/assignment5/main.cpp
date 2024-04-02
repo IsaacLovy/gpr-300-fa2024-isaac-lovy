@@ -4,6 +4,7 @@
 
 #include <ilgl/framebuffer.h>
 #include <ilgl/ilgl_scene.h>
+#include <ilgl/hierarchy.h>
 
 #include <ew/procGen.h>
 #include <ew/shader.h>
@@ -64,13 +65,13 @@ glm::vec3 lightDir = glm::vec3(0, -1, 0);
 
 ew::Camera lightCam;
 float lightCamDist = 5.0f;
-glm::vec3 dirLightColor = glm::vec3(0.5f, 0.5f, 0.5f);
-float pointLightIntensity = 1;
+glm::vec3 dirLightColor = glm::vec3(1, 1, 1);
+float pointLightIntensity = 0.2f;
 
 ew::CameraController cameraController;
 ew::Camera camera;
 
-bool drawPointLightSpheres = true;
+bool drawPointLightSpheres = false;
 
 struct PointLight {
 	float radius;
@@ -90,7 +91,7 @@ glm::vec4 randomColor()
 }
 
 int main() {
-	GLFWwindow* window = initWindow("Assignment 3", screenWidth, screenHeight);
+	GLFWwindow* window = initWindow("Assignment 5", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	lightCam.orthographic = true;
@@ -111,7 +112,52 @@ int main() {
 	ew::Shader lightOrbShader = ew::Shader("assets/lightOrb.vert", "assets/lightOrb.frag");
 
 	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
-	ew::Transform monkeyTransform;
+	
+	ilgl::Node mech[7];
+		
+	ilgl::Node torsoTransform;
+	torsoTransform.position = glm::vec3(0, 2, 0);
+	torsoTransform.parentIndex = -1;
+	mech[0] = torsoTransform;
+
+	ilgl::Node shoulderTransform_R;
+	shoulderTransform_R.position = glm::vec3(-2, 1, 0);
+	shoulderTransform_R.parentIndex = 0;
+	mech[1] = shoulderTransform_R;
+
+	ilgl::Node bicepTransform_R;
+	bicepTransform_R.position = glm::vec3(0, 2, 0);
+	bicepTransform_R.parentIndex = 1;
+	mech[2] = bicepTransform_R;
+
+
+	ilgl::Node wristTransform_R;
+	wristTransform_R.position = glm::vec3(-2, 0, 0);
+	wristTransform_R.parentIndex = 2;
+	mech[3] = wristTransform_R;
+
+
+
+	ilgl::Node shoulderTransform_L;
+	shoulderTransform_L.position = glm::vec3(2, 1, 0);
+	shoulderTransform_L.parentIndex = 0;
+	mech[4] = shoulderTransform_L;
+
+
+	ilgl::Node bicepTransform_L;
+	bicepTransform_L.position = glm::vec3(0, 2, 0);
+	bicepTransform_L.parentIndex = 4;
+	mech[5] = bicepTransform_L;
+
+
+	ilgl::Node wristTransform_L;
+	wristTransform_L.position = glm::vec3(2, 0, 0);
+	wristTransform_L.parentIndex = 5;
+	mech[6] = wristTransform_L;
+
+	ilgl::Hierarchy mechHierarchy;
+
+	mechHierarchy.setup(mech, 7);
 
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
 	ew::Transform groundTransform;
@@ -137,19 +183,19 @@ int main() {
 		}
 		points[i].transform.position = glm::vec3(x, y, z);
 		points[i].radius = 5;
-		points[i].color = randomColor();
+		points[i].color = glm::vec4(1.0, 1.0, 1.0, 1.0);
 	}
 
-	ilgl::Material monketMat;
-	monketMat.Ka = 0.4;
-	monketMat.Kd = 0.8;
-	monketMat.Ks = 0.5;
-	monketMat.Shininess = 50;
-	monketMat.colorTexture = ew::loadTexture("assets/color.jpg");
-	monketMat.normalTexture = ew::loadTexture("assets/normal.jpg");
+	ilgl::Material monkeyMat;
+	monkeyMat.Ka = 0.4;
+	monkeyMat.Kd = 0.8;
+	monkeyMat.Ks = 0.5;
+	monkeyMat.Shininess = 50;
+	monkeyMat.colorTexture = ew::loadTexture("assets/color.jpg");
+	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
-	int monkeyID = scene.addElement(&gBufferShader, &monkeyModel, monkeyTransform, monketMat);
-	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monketMat);
+	mechHierarchy.addToScene(& scene, &gBufferShader, &monkeyModel, monkeyMat);
+	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monkeyMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
@@ -199,8 +245,10 @@ int main() {
 
 		cameraController.move(window, &camera, deltaTime);
 
+		mechHierarchy.solveFK();
+
 		//RENDER
-		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
+		lightCam.position = -lightDir * lightCamDist;
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
@@ -208,7 +256,7 @@ int main() {
 		glDepthFunc(GL_LEQUAL);
 
 		//Shadow Pass
-		lightCam.position = monkeyTransform.position - lightDir * lightCamDist;
+		lightCam.position = -lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
@@ -229,10 +277,10 @@ int main() {
 		deferredLitShader.setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
 		deferredLitShader.setVec3("_DirLightColor", dirLightColor);
 		deferredLitShader.setFloat("_PointIntensity", pointLightIntensity);
-		deferredLitShader.setFloat("_Material.Ka", monketMat.Ka);
-		deferredLitShader.setFloat("_Material.Kd", monketMat.Kd);
-		deferredLitShader.setFloat("_Material.Ks", monketMat.Ks);
-		deferredLitShader.setFloat("_Material.Shininess", monketMat.Shininess);
+		deferredLitShader.setFloat("_Material.Ka", monkeyMat.Ka);
+		deferredLitShader.setFloat("_Material.Kd", monkeyMat.Kd);
+		deferredLitShader.setFloat("_Material.Ks", monkeyMat.Ks);
+		deferredLitShader.setFloat("_Material.Shininess", monkeyMat.Shininess);
 		deferredLitShader.setFloat("_MinBias", shadowMinBias);
 		deferredLitShader.setFloat("_MaxBias", shadowMaxBias);
 		for (int i = 0; i < MAX_POINT_LIGHTS; i++)

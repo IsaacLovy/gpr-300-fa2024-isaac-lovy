@@ -6,7 +6,9 @@
 #include "../ew/camera.h"
 #include "../ew/shader.h"
 
+
 namespace ilgl {
+	struct Node;
 	struct Material {
 		float Ka = 0.25;
 		float Kd = 0.8;
@@ -22,6 +24,8 @@ namespace ilgl {
 		ew::Shader* shader;
 		ew::Model* model;
 		ew::Transform transform;
+		bool useFK;
+		Node* nodeTransform;
 		Material material;
 	};
 
@@ -31,6 +35,7 @@ namespace ilgl {
 		ILGL_Scene();
 		~ILGL_Scene();
 		int addElement(ew::Shader* shader, ew::Model* mesh, ew::Transform transform, Material mat);
+		int addElement(ew::Shader* shader, ew::Model* mesh, Node* hierarchyTransform, Material mat);
 		void setLightDir(glm::vec3 dir);
 		void drawScene(ew::Camera eye, ew::Camera lightCam);
 		void drawSceneDepth(ew::Camera eye, ew::Shader shadowShader);

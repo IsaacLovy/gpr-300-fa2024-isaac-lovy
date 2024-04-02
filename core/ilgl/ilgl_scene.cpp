@@ -2,6 +2,8 @@
 #include "../ew/external/glad.h"
 #include <GLFW/glfw3.h>
 
+#include "hierarchy.h"
+
 ilgl::ILGL_Scene::ILGL_Scene()
 {
 	lightDir = glm::vec3(0, -1, 0);
@@ -35,6 +37,22 @@ int ilgl::ILGL_Scene::addElement( ew::Shader* shader, ew::Model* model, ew::Tran
 	newElement.model = model;
 	newElement.transform = transform;
 	newElement.material = mat;
+	newElement.useFK = false;
+
+	elements.push_back(newElement);
+
+	return newElement.sceneID;
+}
+
+int ilgl::ILGL_Scene::addElement(ew::Shader* shader, ew::Model* model, ilgl::Node* hierarchyTransform, Material mat)
+{
+	SceneElement newElement = SceneElement();
+	newElement.sceneID = getID();
+	newElement.shader = shader;
+	newElement.model = model;
+	newElement.nodeTransform = hierarchyTransform;
+	newElement.material = mat;
+	newElement.useFK = true;
 
 	elements.push_back(newElement);
 
@@ -55,7 +73,14 @@ void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 		elements[i].shader->setInt("_MainTex", 0);
 		glBindTextureUnit(1, elements[i].material.normalTexture);
 		elements[i].shader->setInt("_NormalTex", 1);
-		elements[i].shader->setMat4("_Model", elements[i].transform.modelMatrix());
+		if (!elements[i].useFK)
+		{
+			elements[i].shader->setMat4("_Model", elements[i].transform.modelMatrix());
+		}
+		else
+		{
+			elements[i].shader->setMat4("_Model", elements[i].nodeTransform->globalTransform);
+		}
 		elements[i].shader->setMat4("_ViewProjection", eye.projectionMatrix() * eye.viewMatrix());
 		elements[i].shader->setVec3("_EyePos", eye.position);
 		elements[i].shader->setVec3("_LightDirection", lightDir);
@@ -78,7 +103,14 @@ void ilgl::ILGL_Scene::drawSceneDepth(ew::Camera eye, ew::Shader globalShader)
 	globalShader.use();
 	for (int i = 0; i < elements.size(); i++)
 	{
-		globalShader.setMat4("_Model", elements[i].transform.modelMatrix());
+		if (!elements[i].useFK)
+		{
+			globalShader.setMat4("_Model", elements[i].transform.modelMatrix());
+		}
+		else
+		{
+			globalShader.setMat4("_Model", elements[i].nodeTransform->globalTransform);
+		}
 		globalShader.setMat4("_ViewProjection", eye.projectionMatrix() * eye.viewMatrix());
 		elements[i].model->draw();
 	}
