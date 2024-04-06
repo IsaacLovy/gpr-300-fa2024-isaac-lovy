@@ -133,10 +133,9 @@ int main() {
 
 	ilgl::Node wristTransform_R;
 	wristTransform_R.position = glm::vec3(-2, 0, 0);
+	wristTransform_R.scale = glm::vec3(.4f, .4f, .4f);
 	wristTransform_R.parentIndex = 2;
 	mech[3] = wristTransform_R;
-
-
 
 	ilgl::Node shoulderTransform_L;
 	shoulderTransform_L.position = glm::vec3(2, 1, 0);
@@ -152,6 +151,7 @@ int main() {
 
 	ilgl::Node wristTransform_L;
 	wristTransform_L.position = glm::vec3(2, 0, 0);
+	wristTransform_L.scale = glm::vec3(.4f, .4f, .4f);
 	wristTransform_L.parentIndex = 5;
 	mech[6] = wristTransform_L;
 
@@ -245,6 +245,14 @@ int main() {
 
 		cameraController.move(window, &camera, deltaTime);
 
+		//ANIMATION
+		mechHierarchy.updateNodeRot(0, glm::vec3(0, 1.0f, 0), 5 * deltaTime);
+		mechHierarchy.updateNodeRot(2, glm::vec3(1, 0, 1), 50 * deltaTime);
+		mechHierarchy.updateNodeRot(5, glm::vec3(-1, 0, 1), 50 * deltaTime);
+
+		mechHierarchy.updateNodeRot(1, glm::vec3(0, 1, 0), sin(time) * 10, true);
+		mechHierarchy.updateNodeRot(4, glm::vec3(0, 1, 0), sin(time) * 10, true);
+
 		mechHierarchy.solveFK();
 
 		//RENDER
@@ -317,7 +325,7 @@ int main() {
 
 		//second full screen quad / Post process
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0, 0, 0, 1.0f);
+		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		fullTex.use();
 		glBindTextureUnit(0, framebuffer.getColorTexture(0));
 		fullTex.setInt("_ColorBuffer", 0);

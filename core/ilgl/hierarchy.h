@@ -11,7 +11,7 @@ namespace ilgl {
 
 	struct Node {
 		glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f,0.0f);
+		glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		glm::mat4 globalTransform;
@@ -33,8 +33,11 @@ namespace ilgl {
 		Node* nodes;
 		unsigned int nodeCount;
 
+		~Hierarchy();
+
 		void setup(Node* newHierarchy, int numNodes);
 		void addToScene(ILGL_Scene* scene, ew::Shader* shader, ew::Model* mesh, Material mat);
+		void updateNodeRot(int id, glm::vec3 axis, float degrees, bool absolute = false);
 		void solveFK();
 	};
 }

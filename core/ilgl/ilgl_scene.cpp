@@ -13,20 +13,6 @@ ilgl::ILGL_Scene::ILGL_Scene()
 
 ilgl::ILGL_Scene::~ILGL_Scene()
 {
-	//for (int i = 0; i < elements.size(); i++)
-	//{
-	//	if (elements[i].shader != nullptr)
-	//	{
-	//		delete elements[i].shader;
-	//		elements[i].shader = nullptr;
-	//	}
-
-	//	if (elements[i].model != nullptr)
-	//	{
-	//		delete elements[i].model;
-	//		elements[i].model = nullptr;
-	//	}
-	//}
 }
 
 int ilgl::ILGL_Scene::addElement( ew::Shader* shader, ew::Model* model, ew::Transform transform, Material mat)
