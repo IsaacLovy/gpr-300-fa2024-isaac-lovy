@@ -32,14 +32,11 @@ struct PointLight{
 	vec4 color;
 };
 
+#include lightingFuncs.frag
+
 #define MAX_POINT_LIGHTS 64
 
 uniform PointLight _PointLights[MAX_POINT_LIGHTS];
-
-float attenuateExponential(float dist, float radius){
-	float i = clamp(1.0 - pow(dist/radius,4.0),0.0,1.0);
-	return i * i;	
-}
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 pos){
 	vec3 diff = light.position - pos;

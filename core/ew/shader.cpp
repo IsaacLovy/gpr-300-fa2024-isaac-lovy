@@ -8,6 +8,7 @@
 #include "external/glad.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "../Shadinclude.hpp"
 
 namespace ew {
 	/// <summary>
@@ -16,14 +17,15 @@ namespace ew {
 	/// <param name="filePath"></param>
 	/// <returns></returns>
 	std::string loadShaderSourceFromFile(const std::string& filePath) {
-		std::ifstream fstream(filePath);
-		if (!fstream.is_open()) {
-			printf("Failed to load file %s", filePath.c_str());
-			return {};
-		}
-		std::stringstream buffer;
-		buffer << fstream.rdbuf();
-		return buffer.str();
+		//std::ifstream fstream(filePath);
+		//if (!fstream.is_open()) {
+		//	printf("Failed to load file %s", filePath.c_str());
+		//	return {};
+		//}
+		//std::stringstream buffer;
+		//buffer << fstream.rdbuf();
+		std::string source = Shadinclude::load(filePath);
+		return source;
 	}
 
 	/// <summary>
