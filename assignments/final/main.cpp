@@ -111,7 +111,10 @@ int main() {
 
 	ew::Shader lightOrbShader = ew::Shader("assets/lightOrb.vert", "assets/lightOrb.frag");
 
-	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
+	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx");
+	ew::Transform particleTransform;
+	particleTransform.position = glm::vec3(0, 0, 0);
+	particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);
 
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
 	ew::Transform groundTransform;
@@ -126,6 +129,7 @@ int main() {
 	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
 	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monkeyMat);
+	int monkeyID = scene.addElement(&gBufferShader, &particleMesh, particleTransform, monkeyMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
