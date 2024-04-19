@@ -129,7 +129,7 @@ int main() {
 	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
 	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monkeyMat);
-	int monkeyID = scene.addElement(&gBufferShader, &particleMesh, particleTransform, monkeyMat);
+	int particleSystem = scene.addElement(&gBufferShader, &particleMesh, particleTransform, monkeyMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);

@@ -32,6 +32,7 @@ namespace ew {
 		void draw(DrawMode drawMode = DrawMode::TRIANGLES)const;
 		inline int getNumVertices()const { return m_numVertices; }
 		inline int getNumIndices()const { return m_numIndices; }
+		void calcBBox(MeshData& meshData);
 	private:
 		bool m_initialized = false;
 		unsigned int m_vao = 0;
@@ -39,5 +40,7 @@ namespace ew {
 		unsigned int m_ebo = 0;
 		unsigned int m_numVertices = 0;
 		unsigned int m_numIndices = 0;
+		glm::vec3 size;
+		glm::vec3 center;
 	};
 }

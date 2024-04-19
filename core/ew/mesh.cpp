@@ -71,4 +71,25 @@ namespace ew {
 		}
 		
 	}
+	void Mesh::calcBBox(MeshData& meshData)
+	{
+		float	min_x, max_x,
+				min_y, max_y,
+				min_z, max_z;
+
+		min_x = max_x = meshData.vertices[0].pos.x;
+		min_y = max_y = meshData.vertices[0].pos.y;
+		min_z = max_z = meshData.vertices[0].pos.z;
+
+		for (int i = 0; i < meshData.vertices.size(); i++)
+		{
+			min_x = std::min(min_x, meshData.vertices[i].pos.x);
+			min_y = std::min(min_y, meshData.vertices[i].pos.y);
+			min_z = std::min(min_z, meshData.vertices[i].pos.z);
+
+			max_x = std::min(max_x, meshData.vertices[i].pos.x);
+			max_y = std::min(max_y, meshData.vertices[i].pos.y);
+			max_z = std::min(max_z, meshData.vertices[i].pos.z);
+		}
+	}
 }
