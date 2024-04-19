@@ -19,3 +19,21 @@ float3 remapFloat3(float3 inValue, float inMin, float inMax, float outMin, float
 {
 	return outMin + (inValue - inMin) * (outMax - outMin) / (inMax - inMin);
 }
+
+/*
+vec3 billboarding(vec3 obj, float objScale, vec3 camPos, mat4 invView)
+{
+	vec3 pos;
+	float scale;
+	vec4 billboard;
+
+	scale *= objScale;
+	obj * objScale;
+
+	invView *= obj;
+
+	obj+= invView;
+
+	return billboard;
+}
+*/
