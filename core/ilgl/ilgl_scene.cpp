@@ -119,3 +119,17 @@ int ilgl::ILGL_Scene::getID()
 	nextID++;
 	return givenId;
 }
+
+unsigned int ilgl::ILGL_Scene::createCubeMap(std::vector<std::string> faces)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++) {
+		//unsigned char* data = ;
+	}
+
+	return 0;
+}

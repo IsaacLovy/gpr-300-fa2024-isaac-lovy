@@ -121,8 +121,19 @@ int main() {
 	groundTransform.position = glm::vec3(0, -1, 0);
 
 	//Skybox
-	ew::Model skyboxMesh = ew::Model(ew::createCube(50.0));
+	ew::Model skyboxMesh = ew::Model(ew::createCube(5.0));
 	ew::Transform skyboxTransform;
+	skyboxTransform.position = glm::vec3(5, 0, 0);
+	std::vector<std::string> faces
+	{
+			"assets/skyboxRight.jpg",
+			"assets/skyboxLeft.jpg",
+			"assets/skyboxTop.jpg",
+			"assets/skyboxBottom.jpg",
+			"assets/skyboxFront.jpg",
+			"assets/skyboxBack.jpg"
+	};
+	unsigned int cubemapTexture = scene.createCubeMap(faces);
 
 	ilgl::Material monkeyMat;
 	monkeyMat.Ka = 0.4;
