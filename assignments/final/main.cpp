@@ -120,6 +120,10 @@ int main() {
 	ew::Transform groundTransform;
 	groundTransform.position = glm::vec3(0, -1, 0);
 
+	//Skybox
+	ew::Model skyboxMesh = ew::Model(ew::createCube(50.0));
+	ew::Transform skyboxTransform;
+
 	ilgl::Material monkeyMat;
 	monkeyMat.Ka = 0.4;
 	monkeyMat.Kd = 0.8;
@@ -128,6 +132,7 @@ int main() {
 	monkeyMat.colorTexture = ew::loadTexture("assets/color.jpg");
 	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
+	int skyboxID = scene.addElement(&gBufferShader, &skyboxMesh, skyboxTransform, monkeyMat);
 	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monkeyMat);
 	int particleSystem = scene.addElement(&gBufferShader, &particleMesh, particleTransform, monkeyMat);
 

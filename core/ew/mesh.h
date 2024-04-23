@@ -40,6 +40,9 @@ namespace ew {
 		unsigned int m_ebo = 0;
 		unsigned int m_numVertices = 0;
 		unsigned int m_numIndices = 0;
+		float	min_x, max_x,
+				min_y, max_y,
+				min_z, max_z;
 		glm::vec3 size;
 		glm::vec3 center;
 	};

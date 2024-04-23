@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 //Isaac Lovy
 //    https://solarianprogrammer.com/2012/07/18/perlin-noise-cpp-11/

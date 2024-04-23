@@ -71,12 +71,9 @@ namespace ew {
 		}
 		
 	}
+	// Henry Foley
 	void Mesh::calcBBox(MeshData& meshData)
 	{
-		float	min_x, max_x,
-				min_y, max_y,
-				min_z, max_z;
-
 		min_x = max_x = meshData.vertices[0].pos.x;
 		min_y = max_y = meshData.vertices[0].pos.y;
 		min_z = max_z = meshData.vertices[0].pos.z;
@@ -87,9 +84,12 @@ namespace ew {
 			min_y = std::min(min_y, meshData.vertices[i].pos.y);
 			min_z = std::min(min_z, meshData.vertices[i].pos.z);
 
-			max_x = std::min(max_x, meshData.vertices[i].pos.x);
-			max_y = std::min(max_y, meshData.vertices[i].pos.y);
-			max_z = std::min(max_z, meshData.vertices[i].pos.z);
+			max_x = std::max(max_x, meshData.vertices[i].pos.x);
+			max_y = std::max(max_y, meshData.vertices[i].pos.y);
+			max_z = std::max(max_z, meshData.vertices[i].pos.z);
 		}
+
+		size = glm::vec3(max_x - min_x, max_y - min_y, max_z - min_z);
+		center = glm::vec3((min_x + max_x) / 2, (min_y + max_y) / 2, (min_y + max_y) / 2);
 	}
 }
