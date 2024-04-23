@@ -37,4 +37,15 @@ vec3 billboarding(vec3 obj, float objScale, vec3 camPos, mat4 invView)
 	return billboard;
 }
 */
-	uvec3 v = round(p);
+//	uvec3 v = round(p);
+
+//Henry Foley
+// https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Flipbook-Node.html
+vec2 flipbook(vec2 UV, float width, float height, float tile)
+{
+    tile = mod(tile, width * height);
+    vec2 tileCount = vec2(1.0) / vec2(width,height);
+    float tileX = abs(height - floor(tile * tileCount.x));
+    float tileY = abs(height - floor(tile * tileCount.y));
+    return (UV + vec2(tileX, tileY)) * tileCount;
+}
