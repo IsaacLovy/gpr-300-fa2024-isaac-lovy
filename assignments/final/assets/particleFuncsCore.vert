@@ -21,15 +21,12 @@ vec3 remapFloat3(vec3 inValue, float inMin, float inMax, float outMin, float out
 }
 
 //Yuuki Endo
-vec3 billboarding(vec3 pos, float scaleMult, vec3 objScale, mat4 invView, mat4 model)
+vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat, mat4 viewProjMat, mat4 model)
 {
-    pos = ((objScale * scaleMult) * pos);
-    vec4 holder;
-    holder = (vec4(pos.x,pos.y,pos.z,0.0f) * invView);
-    pos = holder + pos;
-    
-    pos *= inverse(model);
-    return pos;
+    vec3 camRight = vec3 (viewMat[0][0],viewMat[1][0],viewMat[2][0]);
+    vec3 camUp =  vec3 (viewMat[0][1],viewMat[1][1],viewMat[2][1]);
+    vec3 vertPos = vec3(0.0, 1.0, 0.0) - camRight * vPos.x * scaleMult.x + camUp * vPos.z * scaleMult.y;
+    return viewProjMat *  model * vec4(vertPos,1.0);
 
 }
 
