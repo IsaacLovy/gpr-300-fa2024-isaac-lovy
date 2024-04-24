@@ -5,6 +5,7 @@ layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vTexCoord;
 layout(location = 3) in vec3 vTangent;
 
+
 uniform mat4 _Model; 
 uniform mat4 _ViewProjection;
 uniform mat4 _LightViewProj;
@@ -34,19 +35,10 @@ void main(){
 	vs_out.TBN = mat3(T,B,N);
 	LightSpacePos =  _LightViewProj * _Model * vec4(vPos,1.0);
 
-	mat4 modelView = _ViewProjection*_Model;
-	modelView[0][0] = 1.0; 
-    modelView[0][1] = 0.0; 
-    modelView[0][2] = 0.0; 
-    modelView[1][0] = 0.0; 
-    modelView[1][1] = 1.0; 
-    modelView[1][2] = 0.0; 
-    modelView[2][0] = 0.0; 
-    modelView[2][1] = 0.0; 
-    modelView[2][2] = 1.0; 
+	vec3 camRight(_ViewProjection[0][0],_ViewProjection[1][0],_ViewProjection[2][0]);
+	vec3 camUp(_ViewProjection[0][1],_ViewProjection[1][1],_ViewProjection[2][1]);
 
-	pos = modelView * _Model;
+	vec3 vertPos = vPos + camRight * _Model.x * 1 + camUp * _Model.y * 1;
 
-
-	gl_Position = pos;
+	gl_Position = vec4(vPos,1.0f);
 }
