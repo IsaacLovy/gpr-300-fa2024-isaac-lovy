@@ -108,7 +108,7 @@ int main() {
 	//ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
 	ew::Shader fullTex = ew::Shader("assets/fullquad.vert", "assets/fullTex.frag");
 
-	ew::Shader lightOrbShader = ew::Shader("assets/lightOrb.vert", "assets/lightOrb.frag");
+	ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
 
 	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx");
 	ew::Transform particleTransform;
@@ -118,6 +118,10 @@ int main() {
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
 	ew::Transform groundTransform;
 	groundTransform.position = glm::vec3(0, -1, 0);
+
+	ew::Transform billboardTransform;
+	billboardTransform.position = glm::vec3(0, 5, 0);
+	billboardTransform.scale = glm::vec3(1, 1, 1);
 
 	//Skybox
 	ew::Model skyboxMesh = ew::Model(ew::createCube(5.0));
@@ -144,6 +148,7 @@ int main() {
 
 	int skyboxID = scene.addElement(&shader, &skyboxMesh, skyboxTransform, monkeyMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
+	int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
 	int particleSystem = scene.addElement(&shader, &particleMesh, particleTransform, monkeyMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
