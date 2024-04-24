@@ -20,23 +20,19 @@ vec3 remapFloat3(vec3 inValue, float inMin, float inMax, float outMin, float out
 	return outMin + (inValue - inMin) * (outMax - outMin) / (inMax - inMin);
 }
 
-/*
-vec3 billboarding(vec3 obj, float objScale, vec3 camPos, mat4 invView)
+//Yuuki Endo
+vec3 billboarding(vec3 pos, float scaleMult, vec3 objScale, mat4 invView, mat4 model)
 {
-	vec3 pos;
-	float scale;
-	vec4 billboard;
+    pos = ((objScale * scaleMult) * pos);
+    vec4 holder;
+    holder = (vec4(pos.x,pos.y,pos.z,0.0f) * invView);
+    pos = holder + pos;
+    
+    pos *= inverse(model);
+    return pos;
 
-	scale *= objScale;
-	obj * objScale;
-
-	invView *= obj;
-
-	obj+= invView;
-
-	return billboard;
 }
-*/
+
 //	uvec3 v = round(p);
 
 //Henry Foley
