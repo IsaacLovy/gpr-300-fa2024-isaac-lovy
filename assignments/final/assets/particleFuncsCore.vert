@@ -42,3 +42,13 @@ vec2 flipbook(vec2 UV, float width, float height, float tile)
     float tileY = abs(height - floor(tile * tileCount.y));
     return (UV + vec2(tileX, tileY)) * tileCount;
 }
+
+vec3 cellNoise(int x)
+{
+    vec3 temp = noise3(x);
+    temp.x = (temp.x - 0.0f)/(1.0f-0.0f);
+    temp.y = (temp.y - 0.0f)/(1.0f-0.0f);
+    temp.z = (temp.z - 0.0f)/(1.0f-0.0f);
+
+    return temp;
+}
