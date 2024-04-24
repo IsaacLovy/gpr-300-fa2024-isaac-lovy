@@ -34,12 +34,19 @@ void main(){
 	vs_out.TBN = mat3(T,B,N);
 	LightSpacePos =  _LightViewProj * _Model * vec4(vPos,1.0);
 
-	vec4 pos = vec4(vPos, 1.0);
-    vec4 holder;
-    holder = pos * inverse(_ViewProjection);
-    pos = holder + pos;
-    
-    pos *= _Model;
+	mat4 modelView = _ViewProjection*_Model;
+	modelView[0][0] = 1.0; 
+    modelView[0][1] = 0.0; 
+    modelView[0][2] = 0.0; 
+    modelView[1][0] = 0.0; 
+    modelView[1][1] = 1.0; 
+    modelView[1][2] = 0.0; 
+    modelView[2][0] = 0.0; 
+    modelView[2][1] = 0.0; 
+    modelView[2][2] = 1.0; 
+
+	pos = modelView * _Model;
+
 
 	gl_Position = pos;
 }
