@@ -58,7 +58,6 @@ GLuint colorTexture;
 GLuint normalTexture;
 
 ilgl::FrameBuffer shadowMapBuffer;
-ilgl::FrameBuffer gBuffer;
 ilgl::FrameBuffer framebuffer;
 
 glm::vec3 lightDir = glm::vec3(0, -1, 0);
@@ -101,12 +100,12 @@ int main() {
 
 	ilgl::ILGL_Scene scene;
 
-	//ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
-	ew::Shader gBufferShader = ew::Shader("assets/lit.vert", "assets/geometryPass.frag");
+	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
+	//ew::Shader gBufferShader = ew::Shader("assets/lit.vert", "assets/geometryPass.frag");
 
 	//ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
 	ew::Shader depthOnlyShader = ew::Shader("assets/depthOnly.vert", "assets/depthOnly.frag");
-	ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
+	//ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
 	ew::Shader fullTex = ew::Shader("assets/fullquad.vert", "assets/fullTex.frag");
 
 	ew::Shader lightOrbShader = ew::Shader("assets/lightOrb.vert", "assets/lightOrb.frag");
@@ -143,9 +142,9 @@ int main() {
 	monkeyMat.colorTexture = ew::loadTexture("assets/color.jpg");
 	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
-	int skyboxID = scene.addElement(&gBufferShader, &skyboxMesh, skyboxTransform, monkeyMat);
-	int groundID = scene.addElement(&gBufferShader, &groundPlane, groundTransform, monkeyMat);
-	int particleSystem = scene.addElement(&gBufferShader, &particleMesh, particleTransform, monkeyMat);
+	int skyboxID = scene.addElement(&shader, &skyboxMesh, skyboxTransform, monkeyMat);
+	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
+	int particleSystem = scene.addElement(&shader, &particleMesh, particleTransform, monkeyMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
@@ -155,18 +154,6 @@ int main() {
 	//Setup for ShadowMap
 	shadowMapBuffer = ilgl::FrameBuffer(shadowWidth, shadowHeight, true);
 	shadowMapBuffer.checkValidity();
-
-	gBuffer = ilgl::FrameBuffer();
-	gBuffer.setResolution(screenWidth, screenHeight);
-	gBuffer.initialize();
-	gBuffer.use();
-	gBuffer.addAttachment(0, GL_RGB32F);
-	gBuffer.addAttachment(1, GL_RGB16F);
-	gBuffer.addAttachment(2, GL_RGB8);
-	gBuffer.addDepthAttachment();
-
-	gBuffer.checkValidity();
-	gBuffer.finalize();
 
 	framebuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
 	framebuffer.addAttachment(0, GL_RGB32F);
@@ -197,82 +184,32 @@ int main() {
 
 		//ANIMATION
 
+
 		//RENDER
-		lightCam.position = -lightDir * lightCamDist;
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-
-		//Shadow Pass
-		lightCam.position = -lightDir * lightCamDist;
+		lightCam.position = particleTransform.position - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
 
-		//Geometry Pass
-		gBuffer.use();
+
+		framebuffer.use();
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.getFBO());
+		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		scene.setShadowBiasMinMax(shadowMinBias, shadowMaxBias);
+		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
 		scene.drawScene(camera, lightCam);
 
-		//Lighting Pass
-		framebuffer.use();
-		deferredLitShader.use();
-		glBindTextureUnit(0, gBuffer.getColorTexture(0));
-		glBindTextureUnit(1, gBuffer.getColorTexture(1));
-		glBindTextureUnit(2, gBuffer.getColorTexture(2));
-		glBindTextureUnit(3, shadowMapBuffer.getDepthBuffer());
-		deferredLitShader.setVec3("_EyePos", lightCam.position);
-		deferredLitShader.setVec3("_LightDirection", lightDir);
-		deferredLitShader.setMat4("_LightViewProj", lightCam.projectionMatrix() * lightCam.viewMatrix());
-		deferredLitShader.setVec3("_DirLightColor", dirLightColor);
-		deferredLitShader.setFloat("_PointIntensity", pointLightIntensity);
-		deferredLitShader.setFloat("_Material.Ka", monkeyMat.Ka);
-		deferredLitShader.setFloat("_Material.Kd", monkeyMat.Kd);
-		deferredLitShader.setFloat("_Material.Ks", monkeyMat.Ks);
-		deferredLitShader.setFloat("_Material.Shininess", monkeyMat.Shininess);
-		deferredLitShader.setFloat("_MinBias", shadowMinBias);
-		deferredLitShader.setFloat("_MaxBias", shadowMaxBias);
-		/*for (int i = 0; i < MAX_POINT_LIGHTS; i++)
-		{
-			std::string prefix = "_PointLights[" + std::to_string(i) + "].";
-			deferredLitShader.setVec3(prefix + "position", points[i].transform.position);
-			deferredLitShader.setFloat(prefix + "radius", points[i].radius);
-			deferredLitShader.setVec4(prefix + "color", points[i].color);
-		}*/
-		// Draw to screen
-		glBindVertexArray(dummyVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		//DRAW POINTS
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.getFBO()); //Read from gBuffer 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer.getFBO()); //Write to current fbo
-		glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		
-		//POINT LIGHTS
-		//if (drawPointLightSpheres)
-		//{
-		//	lightOrbShader.use();
-		//	lightOrbShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		//	for (int i = 0; i < MAX_POINT_LIGHTS; i++)
-		//	{
-		//		glm::mat4 m = glm::mat4(1.0f);
-		//		m = glm::translate(m, points[i].transform.position);
-		//		m = glm::scale(m, points[i].transform.scale); //Whatever radius you want
-
-		//		lightOrbShader.setMat4("_Model", m);
-		//		lightOrbShader.setVec3("_Color", points[i].color);
-		//		pointSphere.draw();
-		//	}
-		//}
-
-		//second full screen quad / Post process
+		//Post Process
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		fullTex.use();
 		glBindTextureUnit(0, framebuffer.getColorTexture(0));
 		fullTex.setInt("_ColorBuffer", 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		glBindVertexArray(dummyVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -345,12 +282,6 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	ImGui::Begin("Shadow Map");
 	ImGui::BeginChild("Shadow Map");
 	ImVec2 windowSize = ImGui::GetWindowSize();
-	
-	ImVec2 texSize = ImVec2(screenWidth / 4, screenHeight / 4);
-	for (size_t i = 0; i < 3; i++)
-	{
-		ImGui::Image((ImTextureID)gBuffer.getColorTexture(i), texSize, ImVec2(0, 1), ImVec2(1, 0));
-	}
 
 	ImGui::Image((ImTextureID)shadowMapBuffer.getDepthBuffer(), ImVec2(shadowWidth / 4, shadowHeight / 4), ImVec2(0, 1), ImVec2(1, 0));
 
