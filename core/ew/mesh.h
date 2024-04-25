@@ -12,6 +12,7 @@ namespace ew {
 		glm::vec3 normal;
 		glm::vec2 uv;
 		glm::vec3 tangent;
+		float card_ID = 0;
 	};
 
 	struct MeshData {
@@ -27,8 +28,8 @@ namespace ew {
 	class Mesh {
 	public:
 		Mesh() {};
-		Mesh(const MeshData& meshData);
-		void load(const MeshData& meshData);
+		Mesh(const MeshData& meshData, bool assignBBox = false);
+		void load(const MeshData& meshData, bool generateCardIDs = false);
 		void draw(DrawMode drawMode = DrawMode::TRIANGLES)const;
 		inline int getNumVertices()const { return m_numVertices; }
 		inline int getNumIndices()const { return m_numIndices; }

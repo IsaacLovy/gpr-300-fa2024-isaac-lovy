@@ -9,13 +9,14 @@
 #include "external/glad.h"
 
 namespace ew {
-	Mesh::Mesh(const MeshData& meshData)
+	Mesh::Mesh(const MeshData& meshData, bool assignBBox)
 	{
-		load(meshData);
+		load(meshData, assignBBox);
 	}
-	void Mesh::load(const MeshData& meshData)
+	void Mesh::load(const MeshData& meshData, bool generateCardIDs)
 	{
 		if (!m_initialized) {
+
 			glGenVertexArrays(1, &m_vao);
 			glBindVertexArray(m_vao);
 
@@ -40,6 +41,10 @@ namespace ew {
 			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, tangent));
 			glEnableVertexAttribArray(3);
 
+			//Card ID
+			glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, card_ID));
+			glEnableVertexAttribArray(4);
+
 			m_initialized = true;
 		}
 
@@ -47,14 +52,22 @@ namespace ew {
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 
-		if (meshData.vertices.size() > 0) {
-			glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * meshData.vertices.size(), meshData.vertices.data(), GL_STATIC_DRAW);
+
+		MeshData data = meshData;
+
+		if (generateCardIDs)
+		{
+			calcBBox(data);
 		}
-		if (meshData.indices.size() > 0) {
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * meshData.indices.size(), meshData.indices.data(), GL_STATIC_DRAW);
+
+		if (data.vertices.size() > 0) {
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * data.vertices.size(), data.vertices.data(), GL_STATIC_DRAW);
 		}
-		m_numVertices = meshData.vertices.size();
-		m_numIndices = meshData.indices.size();
+		if (data.indices.size() > 0) {
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * data.indices.size(), data.indices.data(), GL_STATIC_DRAW);
+		}
+		m_numVertices = data.vertices.size();
+		m_numIndices = data.indices.size();
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -71,7 +84,7 @@ namespace ew {
 		}
 		
 	}
-	// Henry Foley
+	// Henry Foley & Isaac Lovy
 	void Mesh::calcBBox(MeshData& meshData)
 	{
 		min_x = max_x = meshData.vertices[0].pos.x;
@@ -91,5 +104,10 @@ namespace ew {
 
 		size = glm::vec3(max_x - min_x, max_y - min_y, max_z - min_z);
 		center = glm::vec3((min_x + max_x) / 2, (min_y + max_y) / 2, (min_y + max_y) / 2);
+
+		for (int i = 0; i < meshData.vertices.size(); i++)
+		{
+			meshData.vertices[i].card_ID = (meshData.vertices[i].pos.z + min_z) / size.z;
+		}
 	}
 }

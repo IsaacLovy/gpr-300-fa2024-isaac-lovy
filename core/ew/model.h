@@ -10,7 +10,7 @@
 namespace ew {
 	class Model {
 	public:
-		Model(const std::string& filePath);
+		Model(const std::string& filePath, bool assignBBox = false);
 		Model(ew::Mesh mesh);
 		void draw();
 	private:

@@ -10,9 +10,9 @@
 #include <glm/glm.hpp>
 
 namespace ew {
-	ew::Mesh processAiMesh(aiMesh* aiMesh);
+	ew::Mesh processAiMesh(aiMesh* aiMesh, bool assignBBox = false);
 
-	Model::Model(const std::string& filePath)
+	Model::Model(const std::string& filePath, bool assignBBox)
 	{
 		Assimp::Importer importer;
 		const aiScene* aiScene = importer.ReadFile(filePath, aiProcess_Triangulate);
@@ -41,7 +41,7 @@ namespace ew {
 	}
 
 	//Utility functions local to this file
-	ew::Mesh processAiMesh(aiMesh* aiMesh) {
+	ew::Mesh processAiMesh(aiMesh* aiMesh, bool assignBBox) {
 		ew::MeshData meshData;
 		for (size_t i = 0; i < aiMesh->mNumVertices; i++)
 		{
@@ -67,7 +67,7 @@ namespace ew {
 				meshData.indices.push_back(aiMesh->mFaces[i].mIndices[j]);
 			}
 		}
-		return ew::Mesh(meshData);
+		return ew::Mesh(meshData, assignBBox);
 	}
 
 }

@@ -101,6 +101,7 @@ int main() {
 	ilgl::ILGL_Scene scene;
 
 	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
+	ew::Shader particlesShader = ew::Shader("assets/lit.vert", "assets/cards.frag");
 	//ew::Shader gBufferShader = ew::Shader("assets/lit.vert", "assets/geometryPass.frag");
 
 	//ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
@@ -108,7 +109,7 @@ int main() {
 	//ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
 	ew::Shader fullTex = ew::Shader("assets/fullquad.vert", "assets/fullTex.frag");
 
-	ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
+	//ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
 
 	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx");
 	ew::Transform particleTransform;
@@ -148,8 +149,8 @@ int main() {
 
 	int skyboxID = scene.addElement(&shader, &skyboxMesh, skyboxTransform, monkeyMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
-	int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
-	int particleSystem = scene.addElement(&shader, &particleMesh, particleTransform, monkeyMat);
+	//int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
+	int particleSystem = scene.addElement(&particlesShader, &particleMesh, particleTransform, monkeyMat);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);

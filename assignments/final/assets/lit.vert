@@ -4,6 +4,7 @@ layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vTexCoord;
 layout(location = 3) in vec3 vTangent;
+layout(location = 4) in float vCardID;
 
 uniform mat4 _Model; 
 uniform mat4 _ViewProjection;
@@ -16,6 +17,7 @@ out Surface{
 	vec3 WorldNormal; //Vertex normal in world space
 	vec2 TexCoord;
 	mat3 TBN;
+	float cardID;
 }vs_out;
 
 void main(){
@@ -30,8 +32,8 @@ void main(){
 	vec3 B = normalize(vec3(_Model * vec4(bitangent, 0.0)));
 	vec3 N = normalize(vec3(_Model * vec4(vNormal, 0.0)));
 
-
 	vs_out.TBN = mat3(T,B,N);
 	LightSpacePos =  _LightViewProj * _Model * vec4(vPos,1.0);
+	vs_out.cardID = vCardID;
 	gl_Position = _ViewProjection * _Model * vec4(vPos,1.0);
 }
