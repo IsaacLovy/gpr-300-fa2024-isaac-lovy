@@ -42,3 +42,15 @@ vec2 flipbook(vec2 UV, float width, float height, float tile)
     float tileY = abs(height - floor(tile * tileCount.y));
     return (UV + vec2(tileX, tileY)) * tileCount;
 }
+
+//Yuuki
+//X = CardNumber + lifetime? Some number for each card.
+vec3 noiseGen(int x)
+{
+    vec3 temp = noise3(x);
+    temp.x = (temp.x - 0.0f)/(1.0f-0.0f);
+    temp.y = (temp.y - 0.0f)/(1.0f-0.0f);
+    temp.z = (temp.z - 0.0f)/(1.0f-0.0f);
+
+    return temp;
+}
