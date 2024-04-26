@@ -25,8 +25,8 @@ vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat, mat4 viewP
 {
     vec3 camRight = vec3 (viewMat[0][0],viewMat[1][0],viewMat[2][0]);
     vec3 camUp =  vec3 (viewMat[0][1],viewMat[1][1],viewMat[2][1]);
-    vec3 vertPos = vec3(0.0, 1.0, 0.0) - camRight * vPos.x * scaleMult.x + camUp * vPos.z * scaleMult.y;
-    return viewProjMat *  model * vec4(vertPos,1.0);
+    vec3 vertPos = pos - camRight * vPos.x * scaleMult.x + camUp * vPos.z * scaleMult.y;
+    return vec3(viewProjMat *  model * vec4(vertPos,1.0)).xyz;
 
 }
 
@@ -53,4 +53,20 @@ vec3 noiseGen(int x)
     temp.z = (temp.z - 0.0f)/(1.0f-0.0f);
 
     return temp;
+}
+
+//Henry Foley
+// https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Rotate-Node.html
+vec2 rotator(vec2 UV, vec2 center, float rotation)
+{
+    UV -= center;
+    float s = sin(rotation);
+    float c = cos(rotation);
+    mat2x2 rMatrix = mat2x2(c,-s,s,c);
+    rMatrix *= 0.5;
+    rMatrix += 0.5;
+    rMatrix = rMatrix * 2.0 - 1.0;
+    UV.xy = UV.xy * rMatrix;
+    UV += center;
+    return UV;
 }

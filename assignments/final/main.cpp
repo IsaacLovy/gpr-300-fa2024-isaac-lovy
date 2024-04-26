@@ -138,7 +138,6 @@ int main() {
 			"assets/skyboxBack.jpg"
 	};
 	unsigned int cubemapTexture = scene.createCubeMap(faces);
-
 	ilgl::Material monkeyMat;
 	monkeyMat.Ka = 0.4;
 	monkeyMat.Kd = 0.8;
