@@ -33,7 +33,7 @@ namespace ew {
 		void draw(DrawMode drawMode = DrawMode::TRIANGLES)const;
 		inline int getNumVertices()const { return m_numVertices; }
 		inline int getNumIndices()const { return m_numIndices; }
-		void calcBBox(MeshData& meshData);
+		void calcBBox(const MeshData& meshData);
 	private:
 		bool m_initialized = false;
 		unsigned int m_vao = 0;

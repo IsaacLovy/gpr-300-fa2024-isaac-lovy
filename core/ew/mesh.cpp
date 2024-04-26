@@ -53,11 +53,17 @@ namespace ew {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 
 
-		MeshData data = meshData;
+		MeshData data = MeshData(meshData);
 
+		//Isaac Lovy
 		if (generateCardIDs)
 		{
 			calcBBox(data);
+
+			for (int i = 0; i < data.vertices.size(); i++)
+			{
+				data.vertices[i].card_ID = (data.vertices[i].pos.z - min_z) / (max_z - min_z);
+			}
 		}
 
 		if (data.vertices.size() > 0) {
@@ -84,8 +90,8 @@ namespace ew {
 		}
 		
 	}
-	// Henry Foley & Isaac Lovy
-	void Mesh::calcBBox(MeshData& meshData)
+	// Henry Foley
+	void Mesh::calcBBox(const MeshData& meshData)
 	{
 		min_x = max_x = meshData.vertices[0].pos.x;
 		min_y = max_y = meshData.vertices[0].pos.y;
@@ -104,10 +110,5 @@ namespace ew {
 
 		size = glm::vec3(max_x - min_x, max_y - min_y, max_z - min_z);
 		center = glm::vec3((min_x + max_x) / 2, (min_y + max_y) / 2, (min_y + max_y) / 2);
-
-		for (int i = 0; i < meshData.vertices.size(); i++)
-		{
-			meshData.vertices[i].card_ID = (meshData.vertices[i].pos.z + min_z) / size.z;
-		}
 	}
 }

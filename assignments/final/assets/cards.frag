@@ -10,7 +10,7 @@ in Surface{
 }fs_in;
 
 
-void main(){
-
-	FragColor = vec4(fs_in.cardID,fs_in.cardID, fs_in.cardID, fs_in.cardID 1.0);
+void main() 
+{
+	FragColor = vec4(fs_in.cardID, fs_in.cardID, fs_in.cardID, 1.0);
 }

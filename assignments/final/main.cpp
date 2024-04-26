@@ -111,7 +111,7 @@ int main() {
 
 	//ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
 
-	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx");
+	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx", true);
 	ew::Transform particleTransform;
 	particleTransform.position = glm::vec3(0, 0, 0);
 	particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);

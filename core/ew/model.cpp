@@ -19,7 +19,8 @@ namespace ew {
 		for (size_t i = 0; i < aiScene->mNumMeshes; i++)
 		{
 			aiMesh* aiMesh = aiScene->mMeshes[i];
-			m_meshes.push_back(processAiMesh(aiMesh));
+			m_meshes.push_back(processAiMesh(aiMesh, assignBBox));
+
 		}
 	}
 
@@ -57,6 +58,7 @@ namespace ew {
 			{
 				vertex.tangent = convertAIVec3(aiMesh->mTangents[i]);
 			}
+
 			meshData.vertices.push_back(vertex);
 		}
 		//Convert faces to indices
@@ -67,6 +69,7 @@ namespace ew {
 				meshData.indices.push_back(aiMesh->mFaces[i].mIndices[j]);
 			}
 		}
+
 		return ew::Mesh(meshData, assignBBox);
 	}
 
