@@ -115,7 +115,7 @@ void main(){
 	//Billboarding
 	float billboardLerp = lifetime;
 	float billboardScale = mix(_ParticleStartSize,_ParticleEndSize,billboardLerp);
-	vec3  billboard = billboarding(randomColor * 2, vPos, vec2(billboardScale, billboardScale), _View);
+	vec3  billboard = billboarding(randomColor * 100, vPos, vec2(billboardScale, billboardScale), _View);
 	vec3 position = billboard;
 
 	//Flipbook
