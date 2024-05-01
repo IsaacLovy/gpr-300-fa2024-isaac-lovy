@@ -1,5 +1,7 @@
 #version 450
-#include "particleFuncsCore.vert"
+
+#include particleFuncsCore.vert
+
 //Vertex attributes
 layout(location = 0) in vec3	vPos;
 layout(location = 1) in vec3	vNormal;
@@ -77,7 +79,7 @@ void main(){
 	randomColorSeed += 0.5;
 	randomColorSeed = floor(randomColorSeed);
 	randomColorSeed += flrLifetime;
-	vec3 randomColor = noise3(randomColorSeed);
+	vec3 randomColor = noiseGen(randomColorSeed);
 
 	//Billboarding
 	float billboardLerp = lifetime;
@@ -109,7 +111,7 @@ void main(){
 	position -= 0.5;
 	position *= _EmitterDimensions;
 	position += direction;
-	position *= -_Model;
+	//position *= -_Model;
 	position += billboard;
 	vs_out.WorldPos = position;
 

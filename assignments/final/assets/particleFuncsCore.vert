@@ -1,4 +1,3 @@
-
 //Isaac Lovy 
 //   https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Remap-Node.html
 float remapFloat(float inValue, float inMin, float inMax, float outMin, float outMax)
@@ -45,12 +44,10 @@ vec2 flipbook(vec2 UV, float width, float height, float tile)
 
 //Yuuki
 //X = CardNumber + lifetime? Some number for each card.
-vec3 noiseGen(int x)
+vec3 noiseGen(float x)
 {
     vec3 temp = noise3(x);
-    temp.x = (temp.x - 0.0f)/(1.0f-0.0f);
-    temp.y = (temp.y - 0.0f)/(1.0f-0.0f);
-    temp.z = (temp.z - 0.0f)/(1.0f-0.0f);
+    temp = remapFloat3(temp, -1, 1, 0, 1);
 
     return temp;
 }

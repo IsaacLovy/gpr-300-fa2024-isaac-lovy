@@ -101,7 +101,7 @@ int main() {
 	ilgl::ILGL_Scene scene;
 
 	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
-	ew::Shader particlesShader = ew::Shader("assets/lit.vert", "assets/cards.frag");
+	ew::Shader particlesShader = ew::Shader("assets/ParticleSystem.vert", "assets/ParticleSystem.frag");
 	//ew::Shader gBufferShader = ew::Shader("assets/lit.vert", "assets/geometryPass.frag");
 
 	//ew::Shader postProcessShader = ew::Shader("assets/fullquad.vert", "assets/postProcess.frag");
