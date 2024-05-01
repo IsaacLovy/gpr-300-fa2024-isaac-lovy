@@ -70,7 +70,7 @@ out Surface{
 void main(){
 	//Lifetime
 	lifetime = _Time * _ParticleSpeed;
-	lifetime = mix(lifetime, 1, 1);
+	//lifetime = mix(lifetime, _ManualTime, _DebugTime);
 	lifetime += vVertexColor;
 	float flrLifetime = floor(lifetime);
 	lifetime = fract(lifetime);
@@ -80,7 +80,7 @@ void main(){
 	randomColorSeed += 0.5;
 	randomColorSeed = floor(randomColorSeed);
 	randomColorSeed += flrLifetime;
-	vec3 randomColor = noiseGen(randomColorSeed);
+	vec3 randomColor = noiseGen(vec3(randomColorSeed, randomColorSeed+100,randomColorSeed+500));
 	vs_out.vertColor = randomColor;
 
 	//Forces
@@ -105,19 +105,18 @@ void main(){
 
 	//Position Offset
 	//vec3 position = randomColor;
-	vec3 position = vPos;
+	//vec3 position = vPos;
 	//position -= 0.5;
 	//position *= _EmitterDimensions;
 	//position += direction;
 	//position *= -_Model;
 	//position += billboard;
-	vs_out.WorldPos = position;
 
 	//Billboarding
 	float billboardLerp = lifetime;
 	float billboardScale = mix(_ParticleStartSize,_ParticleEndSize,billboardLerp);
-	vec3  billboard = billboarding(vec3(0.0),vPos, vec2(billboardScale, billboardScale), _View,_ViewProjection, _Model);
-	position = billboard;
+	vec3  billboard = billboarding(randomColor * 2, vPos, vec2(billboardScale, billboardScale), _View);
+	vec3 position = billboard;
 
 	//Flipbook
 	float flipSpeed = _Time * _FlipbookSpeed;
@@ -143,5 +142,6 @@ void main(){
 
 	//World Position Offset
 	//gl_Position = _ViewProjection * _Model * vec4(1.0);
-	gl_Position = _ViewProjection * _Model * vec4(position,1.0);
+	vs_out.WorldPos = position;
+	gl_Position = _ViewProjection * _Model * vec4(position, 1.0);
 }
