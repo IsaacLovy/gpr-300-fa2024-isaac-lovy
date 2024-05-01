@@ -7,7 +7,7 @@ layout(location = 0) in vec3	vPos;
 layout(location = 1) in vec3	vNormal;
 layout(location = 2) in vec2	vTexCoord;
 layout(location = 3) in vec3	vTangent;
-layout(location = 4) in float	vCardID;
+layout(location = 4) in float	vVertexColor;
 
 uniform float _Time;
 uniform mat4 _Model; 
@@ -76,7 +76,7 @@ void main(){
 	lifetime = fract(lifetime);
 	
 	//Random Values
-	float randomColorSeed = vCardID * 255;
+	float randomColorSeed = vVertexColor * 255;
 	randomColorSeed += 0.5;
 	randomColorSeed = floor(randomColorSeed);
 	randomColorSeed += flrLifetime;
@@ -117,7 +117,7 @@ void main(){
 	float billboardLerp = lifetime;
 	float billboardScale = mix(_ParticleStartSize,_ParticleEndSize,billboardLerp);
 	vec3  billboard = billboarding(vec3(0.0),vPos, vec2(billboardScale, billboardScale), _View,_ViewProjection, _Model);
-	//position = billboard;
+	position = billboard;
 
 	//Flipbook
 	float flipSpeed = _Time * _FlipbookSpeed;
