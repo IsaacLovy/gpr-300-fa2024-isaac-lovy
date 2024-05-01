@@ -62,7 +62,7 @@ namespace ew {
 
 			for (int i = 0; i < data.vertices.size(); i++)
 			{
-				data.vertices[i].card_ID = (data.vertices[i].pos.z - min_z) / (max_z - min_z);
+				data.vertices[i].card_ID = (float)((data.vertices[i].pos.z - min_z) / size.z);
 			}
 		}
 
