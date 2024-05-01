@@ -1,10 +1,10 @@
 #version 450
 out vec4 FragColor;		//The color of this fragment
+
 in Surface{
 	vec3 WorldPos;		//Vertex position in world space
-	vec3 WorldNormal;	//Vertex normal in world space
-	vec2 TexCoord;
-	mat3 TBN;
+	vec2 UV;
+	vec3 vertColor;
 }fs_in;
 
 struct Material {
@@ -19,5 +19,5 @@ uniform Material _Material;
 uniform sampler2D	_FlipbookTexture;
 
 void main(){
-	FragColor = vec4(1.0);
+	FragColor = vec4(fs_in.vertColor,1.0);
 }

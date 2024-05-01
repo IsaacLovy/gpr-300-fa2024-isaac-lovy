@@ -25,7 +25,7 @@ vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat, mat4 viewP
     vec3 camRight = vec3 (viewMat[0][0],viewMat[1][0],viewMat[2][0]);
     vec3 camUp =  vec3 (viewMat[0][1],viewMat[1][1],viewMat[2][1]);
     vec3 vertPos = pos - camRight * vPos.x * scaleMult.x + camUp * vPos.z * scaleMult.y;
-    return vec3(viewProjMat *  model * vec4(vertPos,1.0)).xyz;
+    return vertPos;
 
 }
 
