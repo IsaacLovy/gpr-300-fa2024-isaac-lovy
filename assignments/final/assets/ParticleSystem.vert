@@ -66,6 +66,7 @@ out Surface{
 	vec3 WorldPos;		//Vertex position in world space
 	vec2 UV;
 	vec3 vertColor;
+	float lifetime;
 }vs_out;
 
 void main(){
@@ -148,5 +149,6 @@ void main(){
 	//World Position Offset
 	//gl_Position = _ViewProjection * _Model * vec4(1.0);
 	vs_out.WorldPos = position;
+	vs_out.lifetime = lifetime;
 	gl_Position = _ViewProjection * _Model * vec4(position, 1.0);
 }

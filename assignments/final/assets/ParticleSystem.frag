@@ -5,6 +5,7 @@ in Surface{
 	vec3 WorldPos;		//Vertex position in world space
 	vec2 UV;
 	vec3 vertColor;
+	float lifetime;
 }fs_in;
 
 struct Material {
