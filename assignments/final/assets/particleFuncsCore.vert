@@ -33,12 +33,12 @@ vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat)
 
 //Henry Foley
 // https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Flipbook-Node.html
-vec2 flipbook(vec2 UV, float width, float height, float tile)
+vec2 flipbook(vec2 UV, float width, float height, float tile, vec2 invert)
 {
     tile = mod(tile, width * height);
     vec2 tileCount = vec2(1.0) / vec2(width,height);
-    float tileX = abs(height - floor(tile * tileCount.x));
-    float tileY = abs(height - floor(tile * tileCount.y));
+    float tileX = abs(invert.x * width - ((tile - width * floor(tile * tileCount.x)) + invert.x * 1));
+    float tileY = abs(invert.y * height - (floor(tile * tileCount.x) + invert.y * 1));
     return (UV + vec2(tileX, tileY)) * tileCount;
 }
 

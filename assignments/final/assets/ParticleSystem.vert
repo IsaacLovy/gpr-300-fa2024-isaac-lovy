@@ -27,7 +27,7 @@ uniform vec3		_Wind					= vec3(0.0);
 
 //Position and Rotation
 uniform vec3		_EmitterDimensions		= vec3(10.0);
-uniform float		_RotationSpeed			= 80.0;
+uniform float		_RotationSpeed			= 0.0;
 uniform float		_Rotation				= 0.0;
 uniform bool		_RotationRandomOffset	= true;
 uniform bool		_RotationRandomDirection= true;
@@ -113,6 +113,19 @@ void main(){
 	vec3 billboard = billboarding(direction, vPos, vec2(billboardScale, billboardScale), _View);
 	vec3 position = billboard;
 
+	//Rotation
+	float rotSpeed = _Time * _RotationSpeed;
+	rotSpeed += _Rotation;
+	if(_RotationRandomOffset){
+		rotSpeed += directionRandOffset.y * 180;	
+	}
+	if(_RotationRandomDirection)
+	{
+		rotSpeed *= sign(directionRandOffset.x);
+	}
+	rotSpeed = radians(rotSpeed);
+	vec2 rotUV = rotator(vTexCoord, vec2(0.5,0.5), rotSpeed);
+
 	//Flipbook
 	float flipSpeed = _Time * _FlipbookSpeed;
 	flipSpeed = fract(flipSpeed);
@@ -120,20 +133,7 @@ void main(){
 	{
 		flipSpeed = lifetime;
 	}
-	vec2 UV = flipbook(vTexCoord, _FlipbookColumns,_FlipbookRows, 1.0);
-
-//	//Rotation
-//	float rotSpeed = _Time * _RotationSpeed;
-//	rotSpeed += _Rotation;
-//	if(_RotationRandomOffset){
-//		rotSpeed += directionRandOffset.y * 180;	
-//	}
-//	if(_RotationRandomDirection)
-//	{
-//		rotSpeed *= sign(directionRandOffset.x);
-//	}
-//	rotSpeed = radians(rotSpeed);
-//	vs_out.UV = rotator(UV, vec2(0.5,0.5), rotSpeed);
+	vec2 UV = flipbook(vTexCoord, _FlipbookColumns,_FlipbookRows, _Time, vec2(0));
 
 	//World Position Offset
 	//gl_Position = _ViewProjection * _Model * vec4(1.0);
