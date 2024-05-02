@@ -22,13 +22,13 @@ uniform float		_FlipbookSpeed			= 1.0;
 uniform bool		_MatchParticlePhase		= true;
 
 //Forces
-uniform vec3		_Gravity				= vec3(0, -600.0, 0);
+uniform vec3		_Gravity				= vec3(0, -450.0, 0);
 uniform vec3		_Wind					= vec3(0.0);
 
 //Position and Rotation
 uniform vec3		_EmitterDimensions		= vec3(10.0);
 uniform float		_RotationSpeed			= 80.0;
-uniform float		_Rotation				= 0.0;
+uniform float		_Rotation				= 5.0;
 uniform bool		_RotationRandomOffset	= true;
 uniform bool		_RotationRandomDirection= true;
 

@@ -117,6 +117,7 @@ int main() {
 
 	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx", true);
 	ew::Transform particleTransform;
+	particleTransform.position = glm::vec3(0, -1, 0);
 	particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);
 
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));

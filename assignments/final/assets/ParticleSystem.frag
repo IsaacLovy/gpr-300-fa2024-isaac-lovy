@@ -16,8 +16,19 @@ struct Material {
 };
 uniform Material _Material;
 
+//Color
+uniform vec3		_StartColor				= vec3(1.0);
+uniform vec3		_EndColor				= vec3(1.0);
+
 //Flipbook
 uniform sampler2D	_FlipbookTexture;
+
+//Opacity
+uniform float		_Opacity				= 4.0;
+uniform float		_FadeInPower			= 0.5;
+uniform float		_FadeOutPower			= 2.0;
+uniform bool		_SoftEdges				= false;
+uniform float		_AlphaClipThreshold		= 100.0;
 
 void main(){
 	FragColor = vec4(fs_in.vertColor,1.0);
