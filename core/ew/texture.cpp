@@ -60,6 +60,7 @@ namespace ew {
 
 		int width, height, nrChannels;
 		for (unsigned int i = 0; i < faces.size(); i++) {
+			stbi_set_flip_vertically_on_load(true);
 			unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
 			if (data)
 			{
@@ -71,6 +72,7 @@ namespace ew {
 				printf("Cubemap texture failed to load at path: %s", faces[i]);
 				stbi_image_free(data);
 			}
+			stbi_set_flip_vertically_on_load(false);
 		}
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
