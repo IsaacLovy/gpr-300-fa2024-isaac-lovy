@@ -90,6 +90,9 @@ glm::vec4 randomColor()
 }
 
 int main() {
+
+	camera.farPlane = 10000.0f;
+
 	GLFWwindow* window = initWindow("Assignment 5", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
@@ -128,7 +131,7 @@ int main() {
 	ew::Model skyboxMesh = ew::Model(ew::createCube(5.0));
 	ew::Transform skyboxTransform;
 	//skyboxTransform.position = glm::vec3(0.0,100.0,0.0);
-	skyboxTransform.scale = glm::vec3(-1000.0);
+	skyboxTransform.scale = glm::vec3(-100.0);
 	std::vector<std::string> skyboxFaces
 	{
 			"assets/skyboxRight.jpg",
