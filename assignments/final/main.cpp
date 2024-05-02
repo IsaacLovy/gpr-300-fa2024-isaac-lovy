@@ -128,18 +128,18 @@ int main() {
 	billboardTransform.scale = glm::vec3(1, 1, 1);
 
 	//Skybox
-	ew::Model skyboxMesh = ew::Model(ew::createCube(5.0));
+	ew::Model skyboxMesh = ew::Model(ew::createCube(1.0));
 	ew::Transform skyboxTransform;
 	//skyboxTransform.position = glm::vec3(0.0,100.0,0.0);
-	skyboxTransform.scale = glm::vec3(-100.0);
+	skyboxTransform.scale = glm::vec3(-1000.0);
 	std::vector<std::string> skyboxFaces
 	{
 			"assets/skyboxRight.jpg",
 			"assets/skyboxLeft.jpg",
 			"assets/skyboxTop.jpg",
 			"assets/skyboxBottom.jpg",
-			"assets/skyboxFront.jpg",
 			"assets/skyboxBack.jpg"
+			"assets/skyboxFront.jpg"
 	};
 	ilgl::Material skyboxMat;
 	skyboxMat.colorTexture = ew::createCubeMap(skyboxFaces);
