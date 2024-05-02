@@ -108,6 +108,7 @@ int main() {
 	ew::Shader depthOnlyShader = ew::Shader("assets/depthOnly.vert", "assets/depthOnly.frag");
 	//ew::Shader deferredLitShader = ew::Shader("assets/fullquad.vert", "assets/deferredLit.frag");
 	ew::Shader fullTex = ew::Shader("assets/fullquad.vert", "assets/fullTex.frag");
+	ew::Shader skyboxShader = ew::Shader("assets/skybox.vert", "assets/skybox.frag");
 
 	//ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
 
@@ -127,8 +128,9 @@ int main() {
 	//Skybox
 	ew::Model skyboxMesh = ew::Model(ew::createCube(5.0));
 	ew::Transform skyboxTransform;
-	skyboxTransform.position = glm::vec3(5, 0, 0);
-	std::vector<std::string> faces
+	//skyboxTransform.position = glm::vec3(0.0,100.0,0.0);
+	skyboxTransform.scale = glm::vec3(-1000.0);
+	std::vector<std::string> skyboxFaces
 	{
 			"assets/skyboxRight.jpg",
 			"assets/skyboxLeft.jpg",
@@ -137,7 +139,9 @@ int main() {
 			"assets/skyboxFront.jpg",
 			"assets/skyboxBack.jpg"
 	};
-	unsigned int cubemapTexture = scene.createCubeMap(faces);
+	ilgl::Material skyboxMat;
+	skyboxMat.colorTexture = ew::createCubeMap(skyboxFaces);
+
 	ilgl::Material monkeyMat;
 	monkeyMat.Ka = 0.4;
 	monkeyMat.Kd = 0.8;
@@ -146,7 +150,7 @@ int main() {
 	monkeyMat.colorTexture = ew::loadTexture("assets/color.jpg");
 	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
 
-	int skyboxID = scene.addElement(&shader, &skyboxMesh, skyboxTransform, monkeyMat);
+	int skyboxID = scene.addElement(&skyboxShader, &skyboxMesh, skyboxTransform, skyboxMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
 	//int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
 	int particleSystem = scene.addElement(&particlesShader, &particleMesh, particleTransform, monkeyMat);
@@ -186,9 +190,6 @@ int main() {
 		prevFrameTime = time;
 
 		cameraController.move(window, &camera, deltaTime);
-
-		//ANIMATION
-
 
 		//RENDER
 		lightCam.position = particleTransform.position - lightDir * lightCamDist;

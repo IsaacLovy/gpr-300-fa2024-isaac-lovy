@@ -41,7 +41,6 @@ namespace ilgl {
 		void drawSceneDepth(ew::Camera eye, ew::Shader shadowShader);
 		void setShadowBuffer(int shadowMap);
 		void setShadowBiasMinMax(float min, float max);
-		unsigned int createCubeMap(std::vector<std::string> faces);
 
 	private:
 		int nextID;
