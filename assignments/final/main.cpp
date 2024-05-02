@@ -28,6 +28,9 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController);
 int screenWidth = 1080;
 int screenHeight = 720;
 
+//Number of Particle Systems
+const int MAX_PARTICLES = 4;
+
 unsigned int shadowWidth = 1024;
 unsigned int shadowHeight = 1024;
 
@@ -115,10 +118,17 @@ int main() {
 
 	//ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
 
-	ew::Model particleMesh = ew::Model("assets/ParticleStack.fbx", true);
-	ew::Transform particleTransform;
-	particleTransform.position = glm::vec3(0, -1, 0);
-	particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);
+	std::vector<ew::Model> particleMeshes;
+	std::vector<ew::Transform> particleTransforms;
+	for (int i = 0; i < MAX_PARTICLES; i++)
+	{
+		particleMeshes.push_back(ew::Model("assets/ParticleStack.fbx", true));
+		ew::Transform particleTransform;
+		particleTransform.position = glm::vec3(-4 + i * 2, -1, 0);
+		particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);
+		particleTransforms.push_back(particleTransform);
+	}
+
 
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
 	ew::Transform groundTransform;
@@ -160,7 +170,11 @@ int main() {
 	int skyboxID = scene.addElement(&skyboxShader, &skyboxMesh, skyboxTransform, skyboxMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
 	//int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
-	int particleSystem = scene.addElement(&particlesShader, &particleMesh, particleTransform, waterFlipBook);
+	for (int i = 0; i < MAX_PARTICLES; i++)
+	{
+		int particleSystem = scene.addElement(&particlesShader, &particleMeshes[i], particleTransforms[i], waterFlipBook);
+	}
+	
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
@@ -202,7 +216,7 @@ int main() {
 		cameraController.move(window, &camera, deltaTime);
 
 		//RENDER
-		lightCam.position = particleTransform.position - lightDir * lightCamDist;
+		lightCam.position = glm::vec3(0,0,0) - lightDir * lightCamDist;
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
