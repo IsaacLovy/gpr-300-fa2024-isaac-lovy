@@ -122,21 +122,22 @@ void main(){
 	}
 	vec2 UV = flipbook(vTexCoord, _FlipbookColumns,_FlipbookRows, 1.0);
 
-	//Rotation
-	float rotSpeed = _Time * _RotationSpeed;
-	rotSpeed += _Rotation;
-	if(_RotationRandomOffset){
-		rotSpeed += directionRandOffset.y * 180;	
-	}
-	if(_RotationRandomDirection)
-	{
-		rotSpeed *= sign(directionRandOffset.x);
-	}
-	rotSpeed = radians(rotSpeed);
-	vs_out.UV = rotator(UV, vec2(0.5,0.5), rotSpeed);
+//	//Rotation
+//	float rotSpeed = _Time * _RotationSpeed;
+//	rotSpeed += _Rotation;
+//	if(_RotationRandomOffset){
+//		rotSpeed += directionRandOffset.y * 180;	
+//	}
+//	if(_RotationRandomDirection)
+//	{
+//		rotSpeed *= sign(directionRandOffset.x);
+//	}
+//	rotSpeed = radians(rotSpeed);
+//	vs_out.UV = rotator(UV, vec2(0.5,0.5), rotSpeed);
 
 	//World Position Offset
 	//gl_Position = _ViewProjection * _Model * vec4(1.0);
+	vs_out.UV = UV;
 	vs_out.WorldPos = position;
 	vs_out.lifetime = lifetime;
 	gl_Position = _ViewProjection * _Model * vec4(position, 1.0);

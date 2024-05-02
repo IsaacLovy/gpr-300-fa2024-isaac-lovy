@@ -58,6 +58,9 @@ void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 		elements[i].shader->setInt("_MainTex", 0);
 		glBindTextureUnit(1, elements[i].material.normalTexture);
 		elements[i].shader->setInt("_NormalTex", 1);
+		elements[i].shader->setInt("_FlipbookTexture", 0);
+
+
 		elements[i].shader->setFloat("_Time", glfwGetTime());
 		if (!elements[i].useFK)
 		{
@@ -82,6 +85,7 @@ void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 		elements[i].shader->setFloat("_Material.Ks", elements[i].material.Ks);
 		elements[i].shader->setFloat("_Material.Shininess", elements[i].material.Shininess);
 		elements[i].model->draw();
+
 	}
 }
 

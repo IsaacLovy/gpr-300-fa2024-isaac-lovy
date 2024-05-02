@@ -153,11 +153,14 @@ int main() {
 	monkeyMat.Shininess = 50;
 	monkeyMat.colorTexture = ew::loadTexture("assets/color.jpg");
 	monkeyMat.normalTexture = ew::loadTexture("assets/normal.jpg");
+	
+	ilgl::Material waterFlipBook;
+	waterFlipBook.colorTexture = ew::loadTexture("assets/textures/waterFlipbook.png", STBI_rgb_alpha);
 
 	int skyboxID = scene.addElement(&skyboxShader, &skyboxMesh, skyboxTransform, skyboxMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
 	//int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
-	int particleSystem = scene.addElement(&particlesShader, &particleMesh, particleTransform, monkeyMat);
+	int particleSystem = scene.addElement(&particlesShader, &particleMesh, particleTransform, waterFlipBook);
 
 	//Setup for post process Buffer & Fullscreen Quad
 	ilgl::FrameBuffer postProcessBuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
@@ -169,7 +172,7 @@ int main() {
 	shadowMapBuffer.checkValidity();
 
 	framebuffer = ilgl::FrameBuffer(screenWidth, screenHeight);
-	framebuffer.addAttachment(0, GL_RGB32F);
+	framebuffer.addAttachment(0, GL_RGBA32F);
 	framebuffer.addDepthAttachment();
 	framebuffer.checkValidity();
 	framebuffer.finalize();
@@ -184,7 +187,10 @@ int main() {
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK); //Back face culling
-	glEnable(GL_DEPTH_TEST); //Depth testing
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST); //Depth testing
+
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -200,7 +206,6 @@ int main() {
 		scene.setLightDir(lightDir);
 		shadowMapBuffer.use();
 		scene.drawSceneDepth(lightCam, depthOnlyShader);
-
 
 		framebuffer.use();
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.getFBO());

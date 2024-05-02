@@ -1,6 +1,6 @@
 #version 450
 out vec4 FragColor;		//The color of this fragment
-
+#include particleFuncs.frag
 in Surface{
 	vec3 WorldPos;		//Vertex position in world space
 	vec2 UV;
@@ -28,8 +28,10 @@ uniform float		_Opacity				= 4.0;
 uniform float		_FadeInPower			= 0.5;
 uniform float		_FadeOutPower			= 2.0;
 uniform bool		_SoftEdges				= false;
-uniform float		_AlphaClipThreshold		= 100.0;
+uniform float		_AlphaClipThreshold		= 0.8;
 
 void main(){
-	FragColor = vec4(fs_in.vertColor,1.0);
+	vec4 color = texture(_FlipbookTexture,fs_in.UV);
+	vec4 a = clipPixel(color,_AlphaClipThreshold);
+	FragColor = vec4(a);
 }
