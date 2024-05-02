@@ -18,8 +18,8 @@ uniform mat4 _LightViewProj;
 //Flipbook
 uniform float		_FlipbookColumns		= 8.0;
 uniform float		_FlipbookRows			= 4.0;
-uniform float		_FlipbookSpeed			= 1.0;
-uniform bool		_MatchParticlePhase		= true;
+uniform float		_FlipbookSpeed			= 25.0;
+uniform bool		_MatchParticlePhase		= false;
 
 //Forces
 uniform vec3		_Gravity				= vec3(0, -600.0, 0);
@@ -27,7 +27,7 @@ uniform vec3		_Wind					= vec3(0.0);
 
 //Position and Rotation
 uniform vec3		_EmitterDimensions		= vec3(10.0);
-uniform float		_RotationSpeed			= 0.0;
+uniform float		_RotationSpeed			= 80.0;
 uniform float		_Rotation				= 0.0;
 uniform bool		_RotationRandomOffset	= true;
 uniform bool		_RotationRandomDirection= true;
@@ -128,12 +128,12 @@ void main(){
 
 	//Flipbook
 	float flipSpeed = _Time * _FlipbookSpeed;
-	flipSpeed = fract(flipSpeed);
+	flipSpeed = floor(flipSpeed);
 	if(_MatchParticlePhase)
 	{
-		flipSpeed = lifetime;
+		flipSpeed = floor(lifetime);
 	}
-	vec2 UV = flipbook(vTexCoord, _FlipbookColumns,_FlipbookRows, _Time, vec2(0));
+	vec2 UV = flipbook(rotUV, _FlipbookColumns,_FlipbookRows, flipSpeed, vec2(0));
 
 	//World Position Offset
 	//gl_Position = _ViewProjection * _Model * vec4(1.0);
