@@ -29,7 +29,7 @@ int screenWidth = 1080;
 int screenHeight = 720;
 
 //Number of Particle Systems
-const int MAX_PARTICLES = 4;
+const int MAX_PARTICLES = 5;
 
 unsigned int shadowWidth = 1024;
 unsigned int shadowHeight = 1024;
