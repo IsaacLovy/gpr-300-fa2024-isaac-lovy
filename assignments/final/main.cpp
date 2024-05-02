@@ -134,12 +134,13 @@ int main() {
 	skyboxTransform.scale = glm::vec3(-1000.0);
 	std::vector<std::string> skyboxFaces
 	{
-			"assets/skyboxRight.jpg",
-			"assets/skyboxLeft.jpg",
-			"assets/skyboxTop.jpg",
-			"assets/skyboxBottom.jpg",
-			"assets/skyboxBack.jpg"
-			"assets/skyboxFront.jpg"
+			"assets/textures/skyboxLeft.jpg",
+			"assets/textures/skyboxRight.jpg",
+			"assets/textures/skyboxBottom.jpg",
+			"assets/textures/skyboxTop.jpg",
+			"assets/textures/skyboxFront.jpg" ,
+			"assets/textures/skyboxBack.jpg"
+
 	};
 	ilgl::Material skyboxMat;
 	skyboxMat.colorTexture = ew::createCubeMap(skyboxFaces);
