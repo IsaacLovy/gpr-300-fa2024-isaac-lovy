@@ -20,11 +20,11 @@ vec3 remapFloat3(vec3 inValue, float inMin, float inMax, float outMin, float out
 }
 
 //Yuuki Endo
-vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat, mat4 viewProjMat, mat4 model)
+vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat)
 {
     vec3 camRight = vec3 (viewMat[0][0],viewMat[1][0],viewMat[2][0]);
     vec3 camUp =  vec3 (viewMat[0][1],viewMat[1][1],viewMat[2][1]);
-    vec3 vertPos = pos - camRight * vPos.x * scaleMult.x + camUp * vPos.z * scaleMult.y;
+    vec3 vertPos = pos + camRight * vPos.x * scaleMult.x + camUp * vPos.y * scaleMult.y;
     return vertPos;
 
 }
@@ -44,13 +44,19 @@ vec2 flipbook(vec2 UV, float width, float height, float tile)
 
 //Yuuki
 //X = CardNumber + lifetime? Some number for each card.
-vec3 noiseGen(float x)
-{
-    vec3 temp = noise3(x);
-    temp = remapFloat3(temp, -1, 1, 0, 1);
 
+vec3 noiseGen(vec3 x)
+{
+    float phi = 1.61803398874989484820459;
+    
+    float rand1 = fract(tan(distance(vec2(x.z,x.y)*phi, vec2(x.z,x.y))*x.x)*vec2(x.z,x.y).x);
+    float rand2 = fract(tan(distance(vec2(x.x,x.z)*phi, vec2(x.x,x.z))*x.y)*vec2(x.x,x.z).x);
+    float rand3 = fract(tan(distance(vec2(x.x,x.y)*phi, vec2(x.x,x.y))*x.z)*vec2(x.x,x.y).x);
+
+    vec3 temp = vec3(rand1,rand2,rand3);
     return temp;
 }
+
 
 //Henry Foley
 // https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Rotate-Node.html
