@@ -29,6 +29,8 @@ uniform float		_FadeInPower			= 0.5;
 uniform float		_FadeOutPower			= 2.0;
 uniform float		_AlphaClipThreshold		= 0.04;
 
+uniform float       _KillFloorY             = -400;
+
 void main(){
 	//Opacity
 	float opacityLifetime = fs_in.lifetime;
@@ -47,9 +49,11 @@ void main(){
 	vec4 color = texture(_FlipbookTexture,fs_in.UV);
 	float a = color.w;
 	a = clipPixel(a,_AlphaClipThreshold);
+	a = discardAtWorldY(a, fs_in.WorldPos.y, _KillFloorY);
 	a *= opacity;
 	a *= opacityLerp;
 	color *= vec4(colorLerp,1.0);
+
 
 	//Output
 	FragColor = vec4(color.xyz,a);
