@@ -5,6 +5,7 @@
 #include "../ew/transform.h"
 #include "../ew/camera.h"
 #include "../ew/shader.h"
+#include <glm/glm.hpp>
 
 
 namespace ilgl {
@@ -20,8 +21,6 @@ namespace ilgl {
 		//Frag Shader 
 		glm::vec4 startColor = glm::vec4(0);
 		glm::vec4 endColor = glm::vec4(0);
-
-		int flipBookTex = 0;
 
 		float opacity = 0.0f;
 		float fadeInPower = 0.0f;
@@ -54,7 +53,7 @@ namespace ilgl {
 		float particleStartSize = 0;
 		float particleEndSize = 0;
 
-		Material();
+		Material() {};
 
 		Material(glm::vec4 startColor, glm::vec4 endColor, int flipBookTex, float opacity, float fadeInPower,
 			float fadeOutPower, float alphaClipThreshhold, float flipColumn, float flipRow, float flipSpeed,
@@ -62,7 +61,7 @@ namespace ilgl {
 			float rotation, int rotRandomOffset, int rotRandomDirection, float particleSpeed,
 			glm::vec3 particleDirMin, glm::vec3 particleDirMax, float particleSpread, float particleVelStart,
 			float particleVelEnd, float particleStartSize, float particleEndSize)
-			: startColor(startColor), endColor(endColor), flipBookTex(flipBookTex), opacity(opacity),
+			: startColor(startColor), endColor(endColor), colorTexture(flipBookTex), opacity(opacity),
 			fadeInPower(fadeInPower), fadeOutPower(fadeOutPower), alphaClipThreshhold(alphaClipThreshhold),
 			flipColumn(flipColumn), flipRow(flipRow), flipSpeed(flipSpeed), matchPhase(matchPhase),
 			gravity(gravity), wind(wind), emmiterDimensions(emmiterDimensions), rotSpeed(rotSpeed),

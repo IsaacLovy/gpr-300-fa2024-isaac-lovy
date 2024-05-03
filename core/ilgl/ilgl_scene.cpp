@@ -71,13 +71,12 @@ void ilgl::ILGL_Scene::drawScene(ew::Camera eye, ew::Camera lightCam)
 		elements[i].shader->setInt("_MainTex", 0);
 		glBindTextureUnit(1, elements[i].material.normalTexture);
 		elements[i].shader->setInt("_NormalTex", 1);
-		elements[i].shader->setInt("_FlipbookTexture", 0);
+		//elements[i].shader->setInt("_FlipbookTexture", 0);
 
 		//Frag Shader
 		elements[i].shader->setVec4("_StartColor", elements[i].material.startColor);
 		elements[i].shader->setVec4("_EndColor", elements[i].material.endColor);
 
-		elements[i].shader->setInt("_FlipbookTexture", elements[i].material.flipBookTex);
 
 		elements[i].shader->setFloat("_Opacity", elements[i].material.opacity);
 		elements[i].shader->setFloat("_FadeInPower", elements[i].material.fadeInPower);

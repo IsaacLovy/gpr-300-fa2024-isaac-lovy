@@ -118,16 +118,21 @@ int main() {
 
 	//ew::Shader billboardShader = ew::Shader("assets/billboard.vert", "assets/lit.frag");
 
-	std::vector<ew::Model> particleMeshes;
-	std::vector<ew::Transform> particleTransforms;
-	for (int i = 0; i < MAX_PARTICLES; i++)
-	{
-		particleMeshes.push_back(ew::Model("assets/ParticleStack.fbx", true));
-		ew::Transform particleTransform;
-		particleTransform.position = glm::vec3(-4 + i * 2, -1, 0);
-		particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);
-		particleTransforms.push_back(particleTransform);
-	}
+	//std::vector<ew::Model> particleMeshes;
+	//std::vector<ew::Transform> particleTransforms;
+	ew::Model waterfallMesh = ew::Model("assets/ParticleStack.fbx", true);
+	ew::Transform waterfallTransform;
+	waterfallTransform.position = glm::vec3(-4, 3, 0);
+	waterfallTransform.scale = glm::vec3(0.01, 0.01, 0.01);
+
+	//for (int i = 0; i < MAX_PARTICLES; i++)
+	//{
+	//	particleMeshes.push_back(ew::Model("assets/ParticleStack.fbx", true));
+	//	ew::Transform particleTransform;
+	//	particleTransform.position = glm::vec3(-4 + i * 2, -1, 0);
+	//	particleTransform.scale = glm::vec3(0.01, 0.01, 0.01);
+	//	particleTransforms.push_back(particleTransform);
+	//}
 
 
 	ew::Model groundPlane = ew::Model(ew::createPlane(15, 15, 2));
@@ -168,17 +173,16 @@ int main() {
 	waterFlipBook.colorTexture = ew::loadTexture("assets/textures/waterFlipbook.png", STBI_rgb_alpha);
 
 
-	ilgl::Material mistMat(glm::vec4(1, 1, 1, 1), glm::vec4(1, 1, 1, 1), 1 /*flipText*/, 1, 1, 2, 0.004f, 1, 1, 1/*flipSpeed*/, 0/*match phase*/, glm::vec3(0, 0, 40), glm::vec3(0, 0, 0), glm::vec3(40, 40, 40), 1/*rotationSpeed*/, 1/*rotation*/, 1/*randomOffset*/, 1/*Randomdirection*/, 0.1, glm::vec3(0, -.1, 0.0), glm::vec3(1, -.1, 1) /*parDirMax*/, 360, 40, 30, 0.5, 1.25);
+	ilgl::Material mistMat(glm::vec4(1, 1, 1, 1), glm::vec4(1, 1, 1, 1), 1 /*flipText*/, 1, 1, 2, 0.004f, 1, 1, 1/*flipSpeed*/, 0/*match phase*/, glm::vec3(0, -40, 0), glm::vec3(0, 0, 0), glm::vec3(40, 40, 40), 1/*rotationSpeed*/, 1/*rotation*/, 1/*randomOffset*/, 1/*Randomdirection*/, 0.1, glm::vec3(0, -.1, 0.0), glm::vec3(1, -.1, 1) /*parDirMax*/, 360, 40, 30, 0.5, 1.25);
 	ilgl::Material smokeMat(glm::vec4(0.421f, 0.421f, 0.421f, 1.0f), glm::vec4(1, 1, 1, 1), 1/*flip tex*/, 4, 0.2, 1, 0.01, 8, 8, 1/*flipspeed*/, 0/*match phase*/, glm::vec3(0, 0, 0), glm::vec3(0, 100, 0), glm::vec3(10, 10, 10), 1/*rotspeed*/, 1/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.1, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 30, 100, 100, 0.2, 0.8);
-	ilgl::Material waterfallMat(glm::vec4(1, 1, 1, 1), glm::vec4(0.702, 1, 1, 1), waterFlipBook.colorTexture/*fliptex*/, 2, 0.5, 0.8, 0.06, 8, 4, 1/*flipspeed*/, 1/*match phase*/, glm::vec3(0, 0, -980), glm::vec3(0, 0, 0)/*wind*/, glm::vec3(30, 3, 3), 1/*rotspeed*/, 1/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.3, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 0.3, 300, 60, 0.15, 1);
+	ilgl::Material waterfallMat(glm::vec4(1, 1, 1, 1), glm::vec4(0.702, 1, 1, 1), waterFlipBook.colorTexture/*fliptex*/, 2, 0.5, 0.8, 0.06, 8, 4, 1/*flipspeed*/, 1/*match phase*/, glm::vec3(0, -980, 0), glm::vec3(0, 0, 0)/*wind*/, glm::vec3(30, 3, 3), 1/*rotspeed*/, 1/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.3, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 0.3, 300, 60, 0.15, 1);
 
 	int skyboxID = scene.addElement(&skyboxShader, &skyboxMesh, skyboxTransform, skyboxMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
 	//int billboardID = scene.addElement(&billboardShader, &groundPlane, billboardTransform, monkeyMat);
-	for (int i = 0; i < MAX_PARTICLES; i++)
-	{
-		int particleSystem = scene.addElement(&particlesShader, &particleMeshes[i], particleTransforms[i], waterFlipBook);
-	}
+
+	int waterfallID = scene.addElement(&particlesShader, &waterfallMesh, waterfallTransform, waterfallMat);
+
 	
 
 	//Setup for post process Buffer & Fullscreen Quad
@@ -208,7 +212,7 @@ int main() {
 	glCullFace(GL_BACK); //Back face culling
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST); //Depth testing
+	glEnable(GL_DEPTH_TEST); //Depth testing
 
 
 	while (!glfwWindowShouldClose(window)) {
