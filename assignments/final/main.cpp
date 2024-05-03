@@ -171,7 +171,7 @@ int main() {
 
 	ew::Model guiMesh = ew::Model("assets/ParticleStack.fbx", true);
 	ew::Transform guiTransform;
-	guiTransform.position = glm::vec3(0, 1.5, 0);
+	guiTransform.position = glm::vec3(0, 3, 0);
 	guiTransform.scale = glm::vec3(0.01, 0.01, 0.01);
 
 
@@ -224,7 +224,7 @@ int main() {
 	ilgl::Material cloudFlipBook;
 	cloudFlipBook.colorTexture = ew::loadTexture("assets/textures/Cloud04_8x8.png", STBI_rgb_alpha);
 	ilgl::Material singleCloudFlipBook;
-	singleCloudFlipBook.colorTexture = ew::loadTexture("assets/textures/cloud.png", STBI_rgb_alpha);
+	singleCloudFlipBook.colorTexture = ew::loadTexture("assets/textures/cloud.png", STBI_rgb_alpha, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, true);
 
 
 
@@ -404,17 +404,17 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		if(ImGui::DragFloat("Rotation Speed", &rotation, 0.01f, 0.0f, 10.0f))
 			isDirty = true;
 
-		if(ImGui::DragFloat("Particle Speed", &particleSpeed, 0.01f, 0.0f, 5.0f))
+		if(ImGui::DragFloat("Particle Speed", &particleSpeed, 0.01f, 0.0f, 5.f))
 			isDirty = true;
-		if(ImGui::DragFloat3("Particle Direction Max", &particleDirMax.x, 0.1f, 0.0f, 10.0f))
+		if(ImGui::DragFloat3("Particle Direction Max", &particleDirMax.x, 0.1f, 0.0f, 1))
 			isDirty = true;
-		if(ImGui::DragFloat3("Particle Direction Min", &particleDirMin.x, 0.1f, 0.0f, 10.0f))
+		if(ImGui::DragFloat3("Particle Direction Min", &particleDirMin.x, 0.1f, 0.0f, 1))
 			isDirty = true;
 		if(ImGui::DragFloat("Particle Spread", &particleSpread, 1,0,1))
 			isDirty = true;
-		if(ImGui::DragFloat("Particle Start Velocity", &particleVelStart, 0.1f, 0.0f, 500.0f))
+		if(ImGui::DragFloat("Particle Start Velocity", &particleVelStart, 0.5f, 0.0f, 5000.0f))
 			isDirty = true;
-		if(ImGui::DragFloat("Particle End Velocity", &particleVelEnd, 0.1f, 0.0f, 100.0f))
+		if(ImGui::DragFloat("Particle End Velocity", &particleVelEnd, 0.5f, 0.0f, 5000.0f))
 			isDirty = true;
 
 		if(ImGui::DragFloat("Particle Start Size", &particleStartSize, 0.001f, 0.0f, 1.0f))
