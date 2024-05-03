@@ -1,6 +1,6 @@
 #include "ilgl_scene.h"
 #include <GLFW/glfw3.h>
-
+#include <iostream>
 #include "hierarchy.h"
 
 
@@ -52,12 +52,10 @@ void ilgl::ILGL_Scene::setLightDir(glm::vec3 dir)
 
 void ilgl::ILGL_Scene::setMaterial(int ID, Material newMat)
 {
-	for each (SceneElement element in elements)
+	for (int i = 0; i < elements.size(); i++)
 	{
-		if(element.sceneID == ID)
-		{
-			element.material = newMat;
-		}
+		if (elements[i].sceneID == ID)
+			elements[i].material = newMat;
 	}
 }
 

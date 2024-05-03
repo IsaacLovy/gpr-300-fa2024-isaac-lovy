@@ -40,6 +40,40 @@ float shadowMaxBias = 0.015;
 float prevFrameTime;
 float deltaTime;
 
+bool isDirty = false;
+
+#pragma region imgui values
+glm::vec4 startColor = glm::vec4(1,1,1,1);
+glm::vec4 endColor = glm::vec4(1,1,1,1);
+
+float opacity = 2.0f;
+float fadeInPower = 0.5f;
+float fadeOutPower = 0.8f;
+float alphaClipThreshhold = 0.06f;
+
+//Vert Shader
+
+glm::vec3 gravity = glm::vec3(0,-980,0);
+glm::vec3 wind = glm::vec3(0,0,0);
+
+glm::vec3 emmiterDimensions = glm::vec3(30,3,3);
+float rotSpeed = 1.0f;
+float rotation = 1.0f;
+int rotRandomOffset = 1;
+int rotRandomDirection = 1;
+
+float particleSpeed = 0.3f;
+glm::vec3 particleDirMin = glm::vec3(0,0,1);
+glm::vec3 particleDirMax = glm::vec3(0,0,1);
+float particleSpread = 0;
+float particleVelStart = 300;
+float particleVelEnd = 60;
+
+float particleStartSize = 0.15;
+float particleEndSize = 1.0;
+#pragma endregion
+
+
 void resetCamera(ew::Camera* camera, ew::CameraController* controller)
 {
 	camera->position = glm::vec3(0, 0, 5.0f);
@@ -122,18 +156,24 @@ int main() {
 	//std::vector<ew::Transform> particleTransforms;
 	ew::Model waterfallMesh = ew::Model("assets/ParticleStack.fbx", true);
 	ew::Transform waterfallTransform;
-	waterfallTransform.position = glm::vec3(-4, 3, 0);
+	waterfallTransform.position = glm::vec3(-4, 3, -5);
 	waterfallTransform.scale = glm::vec3(0.01, 0.01, 0.01);
 
 	ew::Model smokeMesh = ew::Model("assets/ParticleStack.fbx", true);
 	ew::Transform smokeTransform;
-	smokeTransform.position = glm::vec3(4, 0, 0);
+	smokeTransform.position = glm::vec3(4, 0, -5);
 	smokeTransform.scale = glm::vec3(0.01, 0.01, 0.01);
 
 	ew::Model mistMesh = ew::Model("assets/ParticleStack.fbx", true);
 	ew::Transform mistTransform;
-	mistTransform.position = glm::vec3(0, 1.5, 0);
+	mistTransform.position = glm::vec3(0, 1.5, -5);
 	mistTransform.scale = glm::vec3(0.01, 0.01, 0.01);
+
+	ew::Model guiMesh = ew::Model("assets/ParticleStack.fbx", true);
+	ew::Transform guiTransform;
+	guiTransform.position = glm::vec3(0, 1.5, 0);
+	guiTransform.scale = glm::vec3(0.01, 0.01, 0.01);
+
 
 	//for (int i = 0; i < MAX_PARTICLES; i++)
 	//{
@@ -188,9 +228,11 @@ int main() {
 
 
 
-	ilgl::Material mistMat(glm::vec4(1, 1, 1, 1), glm::vec4(1, 1, 1, 1), singleCloudFlipBook.colorTexture /*flipText*/, 1, 1, 2, 0.004f, 1, 1, 1/*flipSpeed*/, 0/*match phase*/, glm::vec3(0, -40, 0), glm::vec3(0, 0, 0), glm::vec3(40, 40, 40), 10/*rotationSpeed*/, 0/*rotation*/, 1/*randomOffset*/, 1/*Randomdirection*/, 0.1, glm::vec3(0, -.1, 0.0), glm::vec3(1, -.1, 1) /*parDirMax*/, 360, 40, 30, 0.5, 1.25);
-	ilgl::Material smokeMat(glm::vec4(0.421f, 0.421f, 0.421f, 1.0f), glm::vec4(1, 1, 1, 1), cloudFlipBook.colorTexture/*flip tex*/, 4, 0.2, 1, 0.01, 8, 8, 1/*flipspeed*/, 0/*match phase*/, glm::vec3(0, 0, 0), glm::vec3(0, 100, 0), glm::vec3(10, 10, 10), 0/*rotspeed*/, 0/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.1, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 30, 100, 100, 0.2, 0.8);
-	ilgl::Material waterfallMat(glm::vec4(1, 1, 1, 1), glm::vec4(0.702, 1, 1, 1), waterFlipBook.colorTexture/*fliptex*/, 2, 0.5, 0.8, 0.06, 8, 4, 1/*flipspeed*/, 1/*match phase*/, glm::vec3(0, -980, 0), glm::vec3(0, 0, 0)/*wind*/, glm::vec3(30, 3, 3), 0/*rotspeed*/, 0/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.3, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 0.3, 300, 60, 0.15, 1);
+	ilgl::Material mistMat(glm::vec4(1, 1, 1, 1), glm::vec4(1, 1, 1, 1), singleCloudFlipBook.colorTexture /*flipText*/, 1, 1, 2, 0.004f, 1, 1, 1/*flipSpeed*/, 0/*match phase*/, glm::vec3(0, -40, 0), glm::vec3(0, 0, 0), glm::vec3(40, 40, 40), 1/*rotationSpeed*/, 1/*rotation*/, 1/*randomOffset*/, 1/*Randomdirection*/, 0.1, glm::vec3(0, -.1, 0.0), glm::vec3(1, -.1, 1) /*parDirMax*/, 360, 40, 30, 0.5, 1.25);
+	ilgl::Material smokeMat(glm::vec4(0.421f, 0.421f, 0.421f, 1.0f), glm::vec4(1, 1, 1, 1), cloudFlipBook.colorTexture/*flip tex*/, 4, 0.2, 1, 0.01, 8, 8, 1/*flipspeed*/, 0/*match phase*/, glm::vec3(0, 0, 0), glm::vec3(0, 100, 0), glm::vec3(10, 10, 10), 1/*rotspeed*/, 1/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.1, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 30, 100, 100, 0.2, 0.8);
+	ilgl::Material waterfallMat(glm::vec4(1, 1, 1, 1), glm::vec4(0.702, 1, 1, 1), waterFlipBook.colorTexture/*fliptex*/, 2, 0.5, 0.8, 0.06, 8, 4, 1/*flipspeed*/, 1/*match phase*/, glm::vec3(0, -980, 0), glm::vec3(0, 0, 0)/*wind*/, glm::vec3(30, 3, 3), 1/*rotspeed*/, 1/*rot*/, 1/*rotRandomOffset*/, 1/*rotDir*/, 0.3, glm::vec3(0, 0, 1), glm::vec3(0, 0, 1)/*maxDir*/, 0.3, 300, 60, 0.15, 1);
+	
+	ilgl::Material imParticles(startColor,endColor,waterFlipBook.colorTexture,opacity,fadeInPower,fadeOutPower,alphaClipThreshhold,8,4,1,1,gravity,wind,emmiterDimensions,rotSpeed,rotation,rotRandomOffset,rotRandomDirection,particleSpeed,particleDirMin,particleDirMax,particleSpread,particleVelStart,particleVelEnd,particleStartSize,particleEndSize);
 
 	int skyboxID = scene.addElement(&skyboxShader, &skyboxMesh, skyboxTransform, skyboxMat);
 	int groundID = scene.addElement(&shader, &groundPlane, groundTransform, monkeyMat);
@@ -200,6 +242,7 @@ int main() {
 	int mistID = scene.addElement(&particlesShader, &mistMesh, mistTransform, mistMat);
 	int smokeID = scene.addElement(&particlesShader, &smokeMesh, smokeTransform, smokeMat);
 
+	int imParticleID = scene.addElement(&particlesShader, &guiMesh, guiTransform, imParticles);
 
 	
 
@@ -253,6 +296,12 @@ int main() {
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		if (isDirty)
+		{
+			ilgl::Material temp(startColor, endColor, waterFlipBook.colorTexture, opacity, fadeInPower, fadeOutPower, alphaClipThreshhold, 8, 4, 1, 1, gravity, wind, emmiterDimensions, rotSpeed, rotation, rotRandomOffset, rotRandomDirection, particleSpeed, particleDirMin, particleDirMax, particleSpread, particleVelStart, particleVelEnd, particleStartSize, particleEndSize);
+			scene.setMaterial(imParticleID, temp);
+			isDirty = false;
+		}
 		scene.setShadowBiasMinMax(shadowMinBias, shadowMaxBias);
 		scene.setShadowBuffer(shadowMapBuffer.getDepthBuffer());
 		scene.drawScene(camera, lightCam);
@@ -290,27 +339,27 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
 	}*/
 
-	if(ImGui::CollapsingHeader("Shadowmap"))
-	{
-		ImGui::DragFloat("Height", &lightCam.orthoHeight);
-		ImGui::DragFloat("Far Plane", &lightCam.farPlane);
-		ImGui::DragFloat("Near Plane", &lightCam.nearPlane);
-		ImGui::DragFloat("Light Distance", &lightCamDist);
-		ImGui::DragFloat("Max Bias", &shadowMaxBias, .001f, 0.0f, 0.2);
-		ImGui::DragFloat("Min Bias", &shadowMinBias, .001f, 0.0f, 0.2);
-	}
+	//if(ImGui::CollapsingHeader("Shadowmap"))
+	//{
+	//	ImGui::DragFloat("Height", &lightCam.orthoHeight);
+	//	ImGui::DragFloat("Far Plane", &lightCam.farPlane);
+	//	ImGui::DragFloat("Near Plane", &lightCam.nearPlane);
+	//	ImGui::DragFloat("Light Distance", &lightCamDist);
+	//	ImGui::DragFloat("Max Bias", &shadowMaxBias, .001f, 0.0f, 0.2);
+	//	ImGui::DragFloat("Min Bias", &shadowMinBias, .001f, 0.0f, 0.2);
+	//}
 
-	if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
-	{
-		if (glm::length(lightDir) != 0)
-		{
-			lightDir = glm::normalize(lightDir);
-		}
-	}
-	ImGui::ColorPicker4("Directional Light Color", &dirLightColor.x);
-	ImGui::DragFloat("Point Light Intensity", &pointLightIntensity, 0.01f, 0.0f, 1.0f);
+	//if (ImGui::DragFloat3("Light Direction", &lightDir.x, 0.1))
+	//{
+	//	if (glm::length(lightDir) != 0)
+	//	{
+	//		lightDir = glm::normalize(lightDir);
+	//	}
+	//}
+	//ImGui::ColorPicker4("Directional Light Color", &dirLightColor.x);
+	//ImGui::DragFloat("Point Light Intensity", &pointLightIntensity, 0.01f, 0.0f, 1.0f);
 
-	ImGui::Checkbox("Render Point Light Spheres", &drawPointLightSpheres);
+	//ImGui::Checkbox("Render Point Light Spheres", &drawPointLightSpheres);
 
 	//if (ImGui::CollapsingHeader("Post Process")) {
 	//	if (ImGui::CollapsingHeader("Vignette"))
@@ -330,6 +379,50 @@ void drawUI(ew::Camera* camera, ew::CameraController* cameraController) {
 	
 	if (ImGui::Button("Reset Camera")) {
 		resetCamera(camera, cameraController);
+	}
+	if (ImGui::CollapsingHeader("Particle System"))
+	{
+		if (ImGui::ColorPicker4("Start Color", &startColor.x))
+			isDirty = true;
+		if (ImGui::ColorPicker4("End Color", &endColor.x))
+			isDirty = true;
+
+		if(ImGui::DragFloat("Opacity", &opacity, 0.01f, 0.0f, 5.0f))
+			isDirty = true;
+		if(ImGui::DragFloat("Fade In Power", &fadeInPower, 0.01f, 0.0f, 1.0f))
+			isDirty = true;
+		if(ImGui::DragFloat("Fade Out Power", &fadeOutPower, 0.01f, 0.0f, 1.0f))
+			isDirty = true;
+		if(ImGui::DragFloat("Alpha Clip Threshhold", &alphaClipThreshhold, 0.001f, 0.0f, 0.5f))
+			isDirty = true;
+
+		if(ImGui::DragFloat3("Gravity", &gravity.x, 1.0f, -1000.0f, 1000.0f))
+			isDirty = true;
+		if(ImGui::DragFloat3("Wind", &wind.x, 0.1f, -100.0f, 100.0f))
+			isDirty = true;
+
+		if(ImGui::DragFloat("Rotation Speed", &rotation, 0.01f, 0.0f, 10.0f))
+			isDirty = true;
+
+		if(ImGui::DragFloat("Particle Speed", &particleSpeed, 0.01f, 0.0f, 5.0f))
+			isDirty = true;
+		if(ImGui::DragFloat3("Particle Direction Max", &particleDirMax.x, 0.1f, 0.0f, 10.0f))
+			isDirty = true;
+		if(ImGui::DragFloat3("Particle Direction Min", &particleDirMin.x, 0.1f, 0.0f, 10.0f))
+			isDirty = true;
+		if(ImGui::DragFloat("Particle Spread", &particleSpread, 1,0,1))
+			isDirty = true;
+		if(ImGui::DragFloat("Particle Start Velocity", &particleVelStart, 0.1f, 0.0f, 500.0f))
+			isDirty = true;
+		if(ImGui::DragFloat("Particle End Velocity", &particleVelEnd, 0.1f, 0.0f, 100.0f))
+			isDirty = true;
+
+		if(ImGui::DragFloat("Particle Start Size", &particleStartSize, 0.001f, 0.0f, 1.0f))
+			isDirty = true;
+		if(ImGui::DragFloat("Particle End Size", &particleEndSize, 0.001f, 0.0f, 1.0f))
+			isDirty = true;
+
+		
 	}
 
 	ImGui::Text("Add Controls Here!");
