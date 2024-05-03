@@ -107,11 +107,6 @@ void main(){
 	//position *= -_Model;
 	//position += billboard;
 
-	//Billboarding
-	float billboardLerp = lifetime;
-	float billboardScale = mix(_ParticleStartSize,_ParticleEndSize,billboardLerp);
-	vec3 billboard = billboarding(direction, vPos, vec2(billboardScale, billboardScale), _View);
-	vec3 position = billboard;
 
 	//Rotation
 	float rotSpeed = _Time * _RotationSpeed;
@@ -124,6 +119,13 @@ void main(){
 		rotSpeed *= sign(directionRandOffset.x);
 	}
 	rotSpeed = radians(rotSpeed);
+
+	//Billboarding
+	float billboardLerp = lifetime;
+	float billboardScale = mix(_ParticleStartSize,_ParticleEndSize,billboardLerp);
+	vec3 billboard = billboarding(direction, vPos, vec2(billboardScale, billboardScale), _View, rotSpeed);
+	vec3 position = billboard;
+
 	vec2 rotUV = rotator(vTexCoord, vec2(0.5,0.5), rotSpeed);
 
 	//Flipbook
@@ -133,7 +135,7 @@ void main(){
 	{
 		flipSpeed = floor(lifetime);
 	}
-	vec2 UV = flipbook(rotUV, _FlipbookColumns,_FlipbookRows, flipSpeed, vec2(0));
+	vec2 UV = flipbook(vTexCoord, _FlipbookColumns,_FlipbookRows, flipSpeed, vec2(0));
 
 	//World Position Offset
 	//gl_Position = _ViewProjection * _Model * vec4(1.0);

@@ -19,18 +19,6 @@ vec3 remapFloat3(vec3 inValue, float inMin, float inMax, float outMin, float out
 	return outMin + (inValue - inMin) * (outMax - outMin) / (inMax - inMin);
 }
 
-//Yuuki Endo
-vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat)
-{
-    vec3 camRight = vec3 (viewMat[0][0],viewMat[1][0],viewMat[2][0]);
-    vec3 camUp =  vec3 (viewMat[0][1],viewMat[1][1],viewMat[2][1]);
-    vec3 vertPos = pos + camRight * vPos.x * scaleMult.x + camUp * vPos.y * scaleMult.y;
-    return vertPos;
-
-}
-
-//	uvec3 v = round(p);
-
 //Henry Foley
 // https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Flipbook-Node.html
 vec2 flipbook(vec2 UV, float width, float height, float tile, vec2 invert)
@@ -72,4 +60,17 @@ vec2 rotator(vec2 UV, vec2 center, float rotation)
     UV.xy = UV.xy * rMatrix;
     UV += center;
     return UV;
+}
+
+
+//Yuuki Endo & Isaac Lovy
+vec3 billboarding(vec3 pos, vec3 vPos,  vec2 scaleMult, mat4 viewMat, float rotation)
+{
+    vec3 camRight = vec3 (viewMat[0][0],viewMat[1][0],viewMat[2][0]);
+    vec3 camUp =  vec3 (viewMat[0][1],viewMat[1][1],viewMat[2][1]);
+
+    vec2 rotPos = rotator(vPos.xy, vec2(0.5, 0.5), rotation);
+
+    vec3 vertPos = pos + camRight * rotPos.x * scaleMult.x + camUp * rotPos.y * scaleMult.y;
+    return vertPos;
 }
